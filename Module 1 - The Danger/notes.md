@@ -44,6 +44,13 @@ Have you ever had something stolen? Perhaps you have had a wallet stolen or had 
 - Module Title: The Danger
 - Module Objective: Explain why networks and data are attacked.
 
+| Topic Section | Topic Title | Topic Objective |
+| --- | --- | --- |
+| 1.1 | War Stories | Explain how vulnerabilities in people, organizations, and nations are exploited by attackers. |
+| 1.2 | Threat Actors | Differentiate threat actor types and their motivations, including script kiddies, hacktivists, organized crime, and nation-state groups. |
+| 1.3 | Threat Impact | Explain how cyberattacks affect privacy, business operations, competitive advantage, and national security. |
+| 1.4 | The Danger Summary | Review key module concepts on attacks, attackers, and impact. |
+
 ### 1.0.6 Class Activity - Top Hacker Shows Us How It's Done
 In this class activity, you will view a TED Talk video that discusses various security vulnerabilities. You will also research one of the vulnerabilities mentioned in the video.
 
