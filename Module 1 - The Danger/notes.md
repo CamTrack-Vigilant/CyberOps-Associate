@@ -54,6 +54,28 @@ Have you ever had something stolen? Perhaps you have had a wallet stolen or had 
 ### 1.0.6 Class Activity - Top Hacker Shows Us How It's Done
 In this class activity, you will view a TED Talk video that discusses various security vulnerabilities. You will also research one of the vulnerabilities mentioned in the video.
 
+#### Part 2 Response: Remote Car Unlock Key Fob Exploit
+Chosen hack (from the video):
+Driving through a parking lot clicking a key fob until it opens a nearby car of the same make — or, in the more advanced version, manipulating the key so it opens every car from one manufacturer.
+
+a. What is the vulnerability being exploited?
+Some car manufacturers use weak or shared key codes in their remote entry systems. In certain models the same code works across multiple vehicles, and in at least one case a researcher was able to manipulate the key so it opened every car from that manufacturer. The core problem is that the keyless entry system does not use strong, unique cryptography per vehicle.
+
+b. What information, data, or control can be gained by a hacker exploiting this vulnerability?
+The attacker gains full physical access to the car without any visible sign of a break-in. They can steal valuables, personal documents, or items stored inside. Because there is no forced entry, most insurance companies will not cover the loss. In a worst case the attacker could also take the car itself.
+
+c. How is the hack performed?
+The attacker drives or walks through a parking lot repeatedly pressing a cloned or modified fob. When the car responds, it unlocks silently. In the more sophisticated version the researcher reverse-engineered the key protocol for a particular manufacturer and produced a single key that could open any vehicle from that brand.
+
+d. What about this particular hack interested me specifically?
+What caught my attention is how invisible it is. There is no smashed window, no alarm, no evidence — just a locked car that was briefly unlocked and re-locked. It also made me think about how much trust we place in small everyday devices like key fobs without ever questioning their security.
+
+e. How do you think this particular hack could be mitigated?
+- Manufacturers should use strong per-vehicle cryptography with true rolling codes that cannot be replayed or predicted.
+- Independent security researchers should test remote entry systems before vehicles go on sale.
+- Firmware update mechanisms should exist so vulnerabilities can be patched after release.
+- As a car owner: avoid leaving valuables in your vehicle, use a physical steering wheel lock as a second layer, and park in monitored areas when possible.
+
 ## 1.1 War Stories
 
 ### 1.1.1 Hijacked People
