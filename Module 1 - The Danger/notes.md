@@ -159,8 +159,44 @@ Search for:
 - "Dyn Analysis Summary of Friday October 21 Attack"
 - Avi Rubin TED talk: "All Your Devices can be Hacked"
 
+Added information from these sources:
+
+Dyn Analysis Summary of Friday October 21 Attack:
+- Dyn reported two major attack windows on October 21, 2016 (about 11:10-13:20 UTC and 15:50-17:00 UTC), with residual impact later in the day.
+- The attack used high-volume, multi-vector TCP and UDP traffic targeting DNS on port 53.
+- Dyn confirmed Mirai botnets as a primary source of malicious traffic and estimated up to about 100,000 malicious endpoints at the time of reporting.
+- A large DNS retry storm from legitimate recursive resolvers increased load to roughly 10-20 times normal traffic, which amplified the outage impact.
+- Mitigation included traffic shaping, anycast rebalancing, filtering, scrubbing services, and coordination with internet infrastructure providers.
+
+Avi Rubin TED talk: All Your Devices can be Hacked:
+- Main idea: Any connected device that runs software can be vulnerable when security is treated as an afterthought.
+- Rubin highlights examples such as medical devices, vehicles, and smartphones to show that cyber risk can translate into physical-world harm.
+- The talk emphasizes that convenience and connectivity increase the attack surface, so secure design, safer defaults, and regular updates are essential.
+
 ### 1.2.3 Lab - Learning the Details of Attacks
 In this lab, you will research and analyze IoT application vulnerabilities.
+
+Lab answers:
+
+Chosen IoT vulnerability:
+- Weak/default credentials and exposed remote management services on internet-connected IoT devices (for example, cameras and home routers), which were heavily abused by Mirai-like botnets.
+
+Questions:
+a. What is the vulnerability?
+- The vulnerability is that many IoT devices are deployed with default usernames and passwords, weak authentication, and exposed services such as Telnet or web admin panels. Attackers can scan the internet, log in with known default credentials, and take control of devices remotely.
+
+b. Who might exploit it? Explain.
+- Cybercriminals and botnet operators can exploit it to build large botnets for DDoS attacks, credential stuffing, malware delivery, or extortion. State-sponsored groups and hacktivists could also exploit these devices to disrupt services or create noise during larger campaigns.
+
+c. Why does the vulnerability exist?
+- Many IoT products were designed for low cost and fast deployment rather than secure-by-default operation. Common causes include weak security design, hardcoded/default credentials, poor patch management, outdated firmware, and users not changing default settings.
+
+d. What could be done to limit the vulnerability?
+- Require unique credentials on first boot and enforce strong password policies.
+- Disable insecure remote services (for example Telnet), enable secure protocols, and restrict management interfaces from the public internet.
+- Keep firmware updated automatically or with easy update workflows.
+- Segment IoT devices on separate networks/VLANs and apply firewall rules.
+- Monitor abnormal traffic patterns to detect compromised devices early.
 
 ## 1.3 Threat Impact
 
