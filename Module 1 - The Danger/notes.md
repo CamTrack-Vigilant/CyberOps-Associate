@@ -111,6 +111,12 @@ Security Onion VM:
 - MD5 Checksum: 8d65135641b9c94e788909026805ad6b
 - SHA512 Checksum: aaca24b0036be5d61dd42a0b3503403e18ae0e12
 
+Lab answers:
+- Applications in the CyberOps menu: Analyst's Home, Wireshark, Firefox Web Browser, Terminal, Keyboard, and DPI Scaling.
+- IP addresses assigned to the virtual machine: `127.0.0.1/8` on the loopback interface, `10.0.2.15/24` on `enp0s3`, `fd17:625c:f037:2:a00:27ff:fea0:548a/64` as the global IPv6 address, and `fe80::a00:27ff:fea0:548a/64` as the link-local IPv6 address.
+- Browser test: Yes, the browser was able to open a search engine successfully.
+- Reflection: A virtual machine is useful because it gives me a safe, isolated environment where I can practice cybersecurity tasks without risking my main computer. It also makes it easier to test tools, run a different operating system, and reset the system if something goes wrong. The disadvantages are that virtual machines need a lot of disk space, RAM, and CPU resources, they can run slower than a physical machine, and setup or compatibility problems can sometimes make labs harder to complete.
+
 ### 1.1.6 Lab - Cybersecurity Case Studies
 In this lab, you will analyze the given cases and answer questions about them.
 
@@ -126,6 +132,14 @@ Common categories and motivations include:
 - Trade secrets and geopolitical actors
 
 Amateurs, also known as script kiddies, have little or no skill. They often use existing tools or instructions found on the internet to launch attacks. Some are just curious, while others try to demonstrate their skills by causing harm. Even though they are using basic tools, the results can still be devastating.
+
+Hacktivists are hackers who protest against a variety of political and social ideas. Hacktivists publicly protest against organizations or governments by posting articles and videos, leaking sensitive information, and disrupting web services with illegitimate traffic in distributed denial of service (DDoS) attacks.
+
+Much of the hacking activity that consistently threatens our security is motivated by financial gain. These cybercriminals want to gain access to our bank accounts, personal data, and anything else they can leverage to generate cash flow.
+
+In the past several years, we have heard many stories about nation states hacking other countries, or otherwise interfering with internal politics. Nation states are also interested in using cyberspace for industrial espionage. The theft of intellectual property can give a country a significant advantage in international trade.
+
+Defending against the fallout from state-sponsored cyberespionage and cyberwarfare will continue to be a priority for cybersecurity professionals.
 
 ### 1.2.2 How Secure Is the Internet of Things?
 The Internet of Things (IoT) is all around us and quickly expanding. We are just beginning to reap the benefits of the IoT. New ways to use connected things are being developed daily. The IoT helps individuals connect things to improve their quality of life. For example, many people are now using connected wearable devices to track their fitness activities.
