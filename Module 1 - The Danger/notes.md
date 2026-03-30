@@ -238,6 +238,80 @@ The internet has become essential as a medium for commercial and financial activ
 ### 1.3.4 Lab - Visualizing the Black Hats
 In this lab, you will research and analyze cybersecurity incidents to create scenarios for how organizations can prevent or mitigate an attack.
 
+Lab answers:
+
+Scenario 1:
+a. Who is the attacker?
+- A financially motivated ransomware operator.
+
+b. What organization or group is the attacker associated with, if any?
+- A ransomware-as-a-service (RaaS) affiliate working with a cybercrime group.
+
+c. What is the motive of the attacker?
+- Financial gain through extortion payments.
+
+d. What method of attack was used?
+- Spear-phishing email with a malicious attachment, followed by credential theft and lateral movement before ransomware deployment.
+
+e. What was the target and vulnerability used against the business?
+- Target: A healthcare provider's internal network and patient systems.
+- Vulnerability: Weak email filtering, users not trained to detect phishing, and lack of MFA on remote access.
+
+f. How could this attack be prevented or mitigated?
+- Use MFA for all remote access and privileged accounts.
+- Deploy advanced email filtering and attachment sandboxing.
+- Provide regular phishing-awareness training.
+- Segment critical systems and maintain offline, tested backups.
+- Use endpoint detection and response (EDR) for early detection.
+
+Scenario 2:
+a. Who is the attacker?
+- A state-sponsored advanced persistent threat (APT) actor.
+
+b. What organization/group is the attacker associated with?
+- A foreign intelligence-linked cyber unit.
+
+c. What is the motive of the attacker?
+- Cyber espionage and theft of intellectual property.
+
+d. What method of attack was used?
+- Spear-phishing campaign to gain initial access, then stealthy persistence and data exfiltration over encrypted channels.
+
+e. What was the target and vulnerability used against the business?
+- Target: A technology and engineering company with valuable design documents.
+- Vulnerability: Insufficient least-privilege controls and delayed patching of internet-facing systems.
+
+f. How could this attack be prevented or mitigated?
+- Apply strict least-privilege and network segmentation.
+- Patch external systems quickly and continuously scan for vulnerabilities.
+- Monitor for abnormal outbound traffic and credential misuse.
+- Use data loss prevention (DLP) controls on sensitive files.
+- Conduct regular threat-hunting and incident response exercises.
+
+Scenario 3:
+a. Who is the attacker?
+- A hacktivist collective.
+
+b. What organization/group is the attacker associated with?
+- An ideologically motivated online protest group.
+
+c. What is the motive of the attacker?
+- Public visibility and political protest against an organization's policies.
+
+d. What method of attack was used?
+- DDoS traffic floods combined with website defacement.
+
+e. What was the target and vulnerability used against the business?
+- Target: A public-facing government service portal.
+- Vulnerability: Outdated content management software and weak DDoS protection at the edge.
+
+f. How could this attack be prevented or mitigated?
+- Use a DDoS protection service and web application firewall (WAF).
+- Keep CMS/plugins updated and remove unnecessary services.
+- Enforce strong authentication and access logging for administrators.
+- Maintain clean backups for quick site restoration.
+- Prepare a communication and incident response plan for public outages.
+
 ## 1.4 The Danger Summary
 This section recaps key points from the module, including:
 
