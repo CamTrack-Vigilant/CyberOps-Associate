@@ -458,7 +458,11 @@ Moderate gaps:
 
 ---
 
-## Module 2 Summary (What to Retain)
+## 2.3 Fighters in the War Against Cybercrime Summary
+
+### 2.3.1 What Did I Learn in this Module?
+<img src="content%20folder/Screenshot%202026-04-01%20163513.png" alt="2.3.1 What Did I Learn in this Module" style="max-width: 100%; height: auto;" />
+
 - A SOC succeeds when people, process, and technology are aligned.
 - Tiered roles support efficient escalation and specialization.
 - SIEM gives visibility; SOAR accelerates response.
