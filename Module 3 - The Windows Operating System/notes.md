@@ -408,7 +408,13 @@ Defender takeaway:
 - Security is a continuous process: configure, validate, monitor, and improve.
 - Strong endpoint defense combines hardening, least privilege, and ongoing review.
 
-## Module 3 Summary (What to Retain)
+## 3.5 The Windows Operating System Summary
+
+### 3.5.1 What Did I Learn in This Module?
+<img src="Content%20folder/Screenshot%202026-04-02%20150232.png" alt="3.5.1 Module summary part 1" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20150308.png" alt="3.5.1 Module summary part 2" style="max-width: 100%; height: auto;" />
+
 - Windows evolved from DOS-era simplicity to NT-based multi-user, multi-process security architecture.
 - GUI knowledge is operationally useful for both users and defenders.
 - Vulnerabilities are unavoidable; risk reduction depends on patching, hardening, and monitoring.
