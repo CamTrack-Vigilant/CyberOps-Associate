@@ -358,6 +358,56 @@ Expected learning:
 - Practice assigning only required permissions.
 - Verify account behavior and policy impact after changes.
 
+## 3.4 Windows Security
+
+This section focuses on built-in Windows security capabilities and how defenders configure, monitor, and verify them.
+
+### 3.4.1 Windows Security Overview
+<img src="Content%20folder/Screenshot%202026-04-02%20135732.png" alt="3.4 Windows Security overview part 1" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20135819.png" alt="3.4 Windows Security overview part 2" style="max-width: 100%; height: auto;" />
+
+Insight:
+- Security tooling is strongest when prevention, detection, and response settings are aligned.
+- The goal is not only to block threats, but to create reliable visibility for investigations.
+
+### 3.4.2 Core Protection Areas
+<img src="Content%20folder/Screenshot%202026-04-02%20140126.png" alt="3.4 Core protection areas part 1" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140422.png" alt="3.4 Core protection areas part 2" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140507.png" alt="3.4 Core protection areas part 3" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140533.png" alt="3.4 Core protection areas part 4" style="max-width: 100%; height: auto;" />
+
+Defender takeaway:
+- Review protection settings regularly after updates.
+- Ensure endpoint controls match your risk profile and organizational policy.
+
+### 3.4.3 Monitoring and Security Operations
+<img src="Content%20folder/Screenshot%202026-04-02%20140610.png" alt="3.4 Monitoring and operations part 1" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140641.png" alt="3.4 Monitoring and operations part 2" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140713.png" alt="3.4 Monitoring and operations part 3" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140756.png" alt="3.4 Monitoring and operations part 4" style="max-width: 100%; height: auto;" />
+
+Operational note:
+- Monitoring without alert triage discipline creates noise.
+- Build repeatable workflows for investigating detections and escalating confirmed incidents.
+
+### 3.4.4 Validation and Security Posture Checks
+<img src="Content%20folder/Screenshot%202026-04-02%20140830.png" alt="3.4 Security posture checks part 1" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140908.png" alt="3.4 Security posture checks part 2" style="max-width: 100%; height: auto;" />
+
+<img src="Content%20folder/Screenshot%202026-04-02%20140943.png" alt="3.4 Security posture checks part 3" style="max-width: 100%; height: auto;" />
+
+Defender takeaway:
+- Security is a continuous process: configure, validate, monitor, and improve.
+- Strong endpoint defense combines hardening, least privilege, and ongoing review.
+
 ## Module 3 Summary (What to Retain)
 - Windows evolved from DOS-era simplicity to NT-based multi-user, multi-process security architecture.
 - GUI knowledge is operationally useful for both users and defenders.
@@ -367,3 +417,4 @@ Expected learning:
 - Process/thread/service investigation is central to endpoint defense and incident triage.
 - Secure configuration and monitoring depend on least privilege, controlled elevation, and strong account governance.
 - WMI, SMB, RDP, and command-line tooling are both operational necessities and common attacker paths.
+- Windows Security settings should be reviewed and validated continuously, not only during initial setup.
