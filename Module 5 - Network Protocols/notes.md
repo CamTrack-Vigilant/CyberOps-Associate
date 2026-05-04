@@ -10,7 +10,9 @@ In this module, you will learn how network protocols work together to allow us t
 
 Find the module overview image in the Content folder below:
 
-![Module overview](./Content folder/Screenshot 2026-05-04 153009.png)
+![Module overview 1](./Content%20folder/Screenshot%202026-05-04%20152956.png)
+
+![Module overview 2](./Content%20folder/Screenshot%202026-05-04%20153009.png)
 
 ---
 
