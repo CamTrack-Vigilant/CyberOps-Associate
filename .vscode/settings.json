@@ -1,0 +1,9 @@
+{
+  "terminal.integrated.profiles.windows": {
+    "Security Onion (SSH)": {
+      "path": "C:\\Windows\\System32\\OpenSSH\\ssh.exe",
+      "args": ["-p", "2222", "analyst@127.0.0.1"],
+      "icon": "terminal-linux"
+    }
+  }
+}

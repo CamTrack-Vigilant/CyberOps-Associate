@@ -1,0 +1,14 @@
+# Temporary files & Office lock files
+~$*
+*.tmp
+
+# Python cache & virtual environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+
+# Scratch & temporary extraction directories
+scratch/
+extracted_temp/
+extracted_objects/

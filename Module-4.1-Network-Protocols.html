@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Network Protocols (4.1) — Module</title>
+  <style>
+    body{font-family:Segoe UI,Roboto,Helvetica,Arial,sans-serif;line-height:1.45;color:#111;padding:28px;max-width:960px;margin:auto}
+    h2{border-bottom:2px solid #ddd;padding-bottom:6px}
+    h3{margin-top:20px}
+    h4{margin-top:16px}
+    pre{background:#f6f8fa;padding:12px;border-radius:6px;overflow:auto}
+    blockquote{border-left:4px solid #ccc;margin:12px 0;padding:8px 12px;background:#fafafa}
+    table{border-collapse:collapse;width:100%;margin:10px 0}
+    th,td{border:1px solid #ddd;padding:8px;text-align:left}
+    code{background:#eef;padding:2px 4px;border-radius:4px}
+  </style>
+</head>
+<body>
+<article>
+  <h2>Network Protocols (4.1)</h2>
+  <hr />
+
+  <h3>Network Communications Process (4.1.1)</h3>
+
+  <h4>Views of the Network (4.1.1.1)</h4>
+  <p><strong>Operational prose:</strong><br>
+  A network can be described simultaneously as a physical substrate (copper, fiber, radio), a forwarding plane (switching/routing elements), and a control and management plane (routing protocols, controllers, management APIs). Each view emphasizes different artifacts: physical-layer impairments (attenuation, SNR, BER), forwarding-state (MAC tables, FIB/LCAM entries), and control-state (routing tables, flow entries, policy rules).</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Observable artifacts: link-state changes, interface counters, CRC/frame errors, unusual link flaps, asymmetric TTLs, mismatched MTUs, and out-of-band control-plane messages.</li>
+    <li>Threat signals: repeated physical-layer errors may indicate cable damage or targeted jamming; rising CRCs and frame truncations can mask fragmentation-based evasion; asymmetric routing and differing ingress/egress paths appear in traceroutes and can reveal man-in-the-middle or route injection attempts.</li>
+    <li>Forensics: correlate NIC-level RX/TX counters, switch port counters, and system logs (dmesg, NIC driver errors) with packet captures to determine whether packet corruption is accidental or intentional.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Observable artifacts: flow tables (match/action), meter entries, counters per flow, controller-to-switch OpenFlow messages (Packet-In, Flow-Mod), and topology discovery events (LLDP).</li>
+    <li>Architectural consequences: control logic centralized enables global visibility but introduces new attack surface (controller compromise). Network policies are expressed as flow rules and installed reactively/proactively.</li>
+    <li>Operational behavior: controller decisions create succinct match-action tables; telemetry is per-flow and aggregated counters replace per-device CLI-only views. Flow churn and high reactive-installs indicate misconfiguration or a denial-of-service against the controller.</li>
+  </ul>
+
+  <blockquote>Foundational maxim: Measure the network at the interface where decisions are made — physical errors at layer 1, flow decisions at the data-plane tables, and policy at the controller.</blockquote>
+
+  <hr />
+
+  <h4>Client-Server Communications (4.1.1.2)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Client-server communication is a layered interaction pattern where clients initiate connections or requests and servers respond, often relying on discovery (DNS), transport (TCP/UDP), and application semantics (HTTP, RPC). The session typically traverses NATs, firewalls, and load balancers; each middlebox may transform headers, terminate TLS, or rewrite payloads.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Logs and traces: server access logs (HTTP status codes, bytes transferred), firewall/Audit logs (allowed/denied flows), NetFlow/IPFIX (flow durations, packet counts), and TCP state transitions visible in packet captures (SYN, SYN/ACK, ACK, FIN).</li>
+    <li>Anomalies: incomplete three-way handshakes indicate SYN scans or SYN flood; repeated RSTs point to middlebox interference or crafted attacks; long-lived flows with low byte rate may be C2 channels or keep-alive abuse.</li>
+    <li>Correlation practice: join server logs (timestamps, request URIs) with packet captures and flow records to reconstruct client-server timelines, revealing request timing, retransmission patterns, and protocol downgrade attempts.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Control-plane influence: controllers can install server-affinity flows, perform service chaining (redirect to inline inspection), and dynamically steer flows to micro-segmentation policies.</li>
+    <li>Programmability: client-server policies are encoded as high-level intents and compiled into flow-table rules (e.g., allow TCP dst port 443 to VIP group A); reactive Packet-In events can trigger context-aware security actions.</li>
+    <li>Performance/security tradeoffs: offloading TLS termination at edge proxies vs. end-to-end encryption affects visibility; SDN controllers can orchestrate TLS inspection nodes and dynamically adjust flow sampling rates for security analytics.</li>
+  </ul>
+
+  <hr />
+
+  <h4>A Typical Session: Student (4.1.1.3)</h4>
+  <p><strong>Operational prose:</strong><br>
+  A student session typically consists of mixed web browsing, video conferencing, LMS access, and occasional file transfers. Access often uses consumer-grade Wi‑Fi or campus Ethernet; endpoints are heterogeneous (laptops, phones) and may use VPNs.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Protocol profile: frequent short-lived TLS sessions to web-based services, DTLS or WebRTC for conferencing, SFTP/HTTPS for file upload, and DNS queries for content delivery networks (CDNs).</li>
+    <li>Logging signatures: erratic port usage due to WebSockets or TURN; bursts of small TLS handshakes; caching behavior in HTTP headers (ETag, If-Modified-Since). Packet captures show variable round-trip times (RTT) and occasional retransmissions due to shared medium contention.</li>
+    <li>Attack surface: student endpoints often run unpatched clients, increasing phishing and MITM risk; look for anomalous DNS NXDOMAIN spikes, uncommon UA strings, and unexpected certificate chains.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Flow handling: controllers can tag student VLANs with specific QoS (lower priority for background sync, higher for video conferencing) and redirect suspicious flows to quarantine microservices.</li>
+    <li>Policy dynamics: per-user policy enforcement — dynamic rules can throttle non-academic traffic or prioritize LMS endpoints based on calendar events.</li>
+    <li>Observability: per-flow counters reveal per-student bandwidth use; telemetry can distinguish between interactive sessions (low jitter) and bulk transfers (high throughput, stable RTT).</li>
+  </ul>
+
+  <p><strong>Timing/Transport/security profile demands:</strong></p>
+  <ul>
+    <li>Latency sensitivity: interactive web browsing tolerates moderate latency (~50–150 ms); video conferencing needs &lt;150 ms one-way ideally, with jitter &lt;30 ms.</li>
+    <li>Transport choices: WebRTC (UDP/DTLS/SRTP) for low-latency audio/video; HTTP/2 or HTTP/3 (QUIC) for page loads — QUIC trades connection stability for lower handshake latency.</li>
+    <li>Windowing: browser parallelism and QUIC stream multiplexing reduce per-connection window constraints but rely on path MTU and RTT for throughput.</li>
+  </ul>
+
+  <hr />
+
+  <h4>A Typical Session: Gamer (4.1.1.4)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Gaming sessions prioritize minimal latency and low jitter. Traffic is predominantly small, frequent UDP packets for position updates, with occasional TCP/TLS for authentication, patches, and voice chat.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Traffic patterns: sustained bidirectional UDP streams with small payloads (20–200 bytes), periodic keepalive packets, and bursts during scene changes. Packet captures show tight inter-packet intervals (often &lt;50 ms).</li>
+    <li>Anomaly detection: sudden packet loss, increases in RTT, or jitter spikes correlate with degraded experience; amplified outgoing traffic may indicate protocol abuse or reflection. Sequence number patterns and checksum anomalies help detect in-path modification or replay attacks.</li>
+    <li>Attack vectors: DDoS (both volumetric and state exhaustion via SYN/UDP floods) directly target game servers; game clients can be exploited to create botnets for reflection attacks.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Flow-programming: SDN can tag and steer gaming flows to low-latency paths, reserve bandwidth via meters, and apply QoS queueing (e.g., strict priority for UDP gaming flows).</li>
+    <li>Dynamic routing: controllers can implement latency-aware path selection, re-routing gaming flows around congested links in near-real-time.</li>
+    <li>Stateful edge functions: game-specific DPI or anti-cheat modules can be deployed inline as services and inserted via dynamic service chaining.</li>
+  </ul>
+
+  <p><strong>Timing/Transport/security profile demands:</strong></p>
+  <ul>
+    <li>Strict latency: target RTT often &lt;50 ms for competitive play; jitter must be minimized; packet loss should be &lt;1%.</li>
+    <li>Transport: UDP preferred for state updates to avoid head-of-line blocking; reliability implemented at application level (sequence numbers, delta compression).</li>
+    <li>Windowing: small payloads imply throughput is less important than low per-packet latency; congestion control adjustments (e.g., pacing) must avoid introducing microbursts.</li>
+  </ul>
+
+  <hr />
+
+  <h4>A Typical Session: Surgeon (4.1.1.5)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Remote surgical procedures or telesurgery require deterministic low-latency, ultra-reliable transport with strict security, often traversing dedicated fiber or high-quality MPLS circuits and employing hardware redundancy.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Observables: end-to-end latencies measured via precise timestamping (PTP/NTP synchronization), constant bandwidth streams for video and control channels, and strong cryptographic authentication logs (mutual TLS with hardware-backed keys).</li>
+    <li>Security posture: mandatory integrity checks, device attestation logs, and tamper-evident telemetry. Any jitter spikes or packet reordering demand immediate failover; forensic logs include signed event records for audit.</li>
+    <li>Threat model: high-consequence attacks (latency injection, video manipulation). Analysts monitor control-plane anomalies, certificate revocations, and device attestation failures; anomalies may trigger immediate session abort.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Network slicing: SDN enables hard-isolated slices with reserved resources (bandwidth guarantees, low-latency paths), strict admission control, and dedicated flow tables. Controllers implement deterministic QoS and path pinning.</li>
+    <li>Failover and redundancy: controllers orchestrate disjoint redundant paths and instant path switchover, using group table fast-failover semantics and pre-installed backup flows.</li>
+    <li>Security integration: integration with key-management services and hardware security modules (HSMs) orchestrated via controller policies for certificate distribution and attestation verification.</li>
+  </ul>
+
+  <p><strong>Timing/Transport/security profile demands:</strong></p>
+  <ul>
+    <li>Deterministic latency: end-to-end latency budgets often &lt;20–50 ms; jitter budgets &lt;10 ms; packet loss must be effectively zero for control channels.</li>
+    <li>Transport: hybrid approach — UDP for ultra-low latency channels with application-level forward error correction (FEC), and TLS-protected TCP or QUIC for non-real-time telemetry and logging.</li>
+    <li>Flow control: application-level pacing, immediate retransmit for control messages, and use of FEC to mask transient losses. Strict window sizes, minimal bufferbloat, and hardware offload for timestamping and QoS enforcement.</li>
+  </ul>
+
+  <hr />
+
+  <h4>Tracing the Path (4.1.1.6)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Tracing the packet path from source to destination requires layering: layer-2 forwarding decisions, layer-3 routing decisions, and inter-domain transit policies. Tools such as traceroute, mtr, and pathchar reveal per-hop RTTs and per-hop behavior; advanced telemetry uses in-band network telemetry (INT) or segment routing.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Artifacts: TTL decremented traces, ICMP time-exceeded messages, MPLS label stacks, and forensics from per-hop NetFlow leading to hop-by-hop packet counts and anomalies.</li>
+    <li>Detection: asymmetric paths, sudden hop-count changes, or unexpected intermediate ASes can indicate route hijack (BGP hijacking) or tunneling used for evasion. Packet timestamps vs. device logs permit reconstruction of latency contributions per hop.</li>
+    <li>Analysis technique: combine TCP timestamps and IPID changes with traceroute hops to detect in-path modification, NAT traversal, or packet duplication.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Controller visibility: SDN controllers maintain global topology and can produce exact hop lists for paths based on installed flow rules; flow-level telemetry provides per-switch counters and match metrics.</li>
+    <li>Programmable tracing: controller-initiated diagnostic flows can install temporary mirroring or INT headers to sample and measure latency, queue depth, and switch processing times.</li>
+    <li>Failure diagnosis: reactive path recomputation and path consistency checks are centrally coordinated; controllers can produce deterministic path reconstruction that includes flow-table versioning.</li>
+  </ul>
+
+  <hr />
+
+  <h3>Communications Protocols (4.1.2)</h3>
+
+  <h4>What Are Protocols? (4.1.2.1)</h4>
+  <p><strong>Operational prose:</strong><br>
+  A protocol is a precisely defined set of rules governing the exchange of PDUs across a communication channel: syntax (format), semantics (meaning), and timing (sequence and retransmission policies). Protocol specifications enumerate header fields, state machines, allowed transitions, and error-handling rules.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Manifestations: packet headers, state transitions (e.g., TCP state machine), and logs (syslog for application-level events). Deviations from specs (invalid header lengths, mismatched checksums) are indicators of malformed traffic or evasion.</li>
+    <li>Detection: fingerprinting protocols via header fields, timing patterns, and handshake sequences; mismatch between declared application protocol and payload (e.g., HTTP over nonstandard ports or obfuscated payloads) is suspicious.</li>
+    <li>Integrity checks: checksum failures, invalid flags, and nonconforming option fields suggest tampering or exploitation attempts (e.g., buffer overflow via malformed TLV structures).</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Abstraction: protocols are treated as matchable patterns in flow tables; controllers translate high-level intents into rule sets matching protocol-level headers.</li>
+    <li>Policy enforcement: protocol-specific policies (e.g., allow DNS only to authoritative resolvers) are centrally enforced and can be dynamically adjusted in response to detected anomalies.</li>
+    <li>Protocol evolution: SDN enables rapid deployment of new protocol handling by updating controller logic and pushing rules, reducing hardware upgrade cycles.</li>
+  </ul>
+
+  <hr />
+
+  <h4>Network Protocol Suites (4.1.2.2)</h4>
+  <p><strong>Operational prose:</strong><br>
+  A protocol suite groups layered protocols that together deliver end-to-end functionality (e.g., TCP/IP suite: IP, IPv6, ICMP, TCP, UDP, application protocols like HTTP, DNS). Suites define inter-layer interfaces and expected services (reliable delivery, in-order delivery, fragmentation, addressing).</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Suite-level effects: interactions produce complex artifacts: ICMP messages influence path MTU discovery; TCP and IP fragmentation affect IDS reassembly logic. Analysts must understand cross-layer interactions to avoid false positives (e.g., fragmented packets that reconstruct into an exploit).</li>
+    <li>Forensics: when investigating incidents, analysts inspect how different suite elements combine — e.g., how DNS-based C2 uses UDP at transport with application-layer obfuscation layered above.</li>
+    <li>Defense: enforce suite-level policies (e.g., block inbound unexpected ICMP types, restrict fragment handling) to reduce attack surface.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Programmatic enforcement: controllers implement suite-aware flows, e.g., match IPv4/IPv6, port numbers, and application layer signatures for deep packet actions.</li>
+    <li>Service chaining: SDN computes and enforces sequences of protocol-specific middleboxes (firewalls, DPI, NAT) as composable services.</li>
+    <li>Telemetry: suite metrics (TCP retransmit rates, UDP jitter) are exposed in controller dashboards, enabling closed-loop adjustments.</li>
+  </ul>
+
+  <hr />
+
+  <h4>The TCP/IP Protocol Suite (4.1.2.3)</h4>
+  <p><strong>Operational prose:</strong><br>
+  TCP/IP is a de facto standard suite: Internet Protocol (IP) provides best-effort, connectionless, best-effort addressing and forwarding; TCP and UDP provide transport services (reliable byte streams vs. datagrams). IP handles fragmentation, TTL, header checksums; TCP handles reliability, flow control, congestion control; UDP is stateless and low-overhead.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>TCP indicators: SYN packets show connection attempts; sequence/ack numbers and flag combinations reveal handshake progression and retransmission. Look for unusual flag combinations (e.g., SYN+FIN) as malformed/noise probes or stealth scans.</li>
+    <li>UDP indicators: absent connection handshakes mean detection relies on flow volume, packet signatures, or response patterns; high rate of small UDP packets may signal amplification misuse or scanning.</li>
+    <li>IP-level signals: TTL anomalies, protocol numbers, and fragmentation behavior are key for detecting tunneling and evasion; IPv6 introduces new extension headers that need special attention.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Flow rule granularity: match on IP protocol, ports, DSCP, and even TCP flags to enact fine-grained controls. SDN enables targeted rate-limiting (meters) and per-flow statistics for TCP/UDP balancing.</li>
+    <li>Congestion handling: controllers can proactively reroute heavy TCP flows, adjust priority queues, or apply shaping at ingress to maintain application SLAs.</li>
+    <li>Middlebox orchestration: NAT, firewall, and TCP proxies can be programmatically inserted or removed, addressing TCP/IP suite interactions such as connection tracking consistency.</li>
+  </ul>
+
+  <hr />
+
+  <h4>Format, Size, and Timing (4.1.2.4)</h4>
+
+  <h5>Format</h5>
+  <p><strong>Operational prose:</strong><br>
+  Format defines the syntax and structure of headers and payloads: fixed-length fields, variable-length TLVs, alignment, endianness, and option encoding. Precise format rules enable deterministic parsing and validation.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Indicators: incorrect header lengths, unusual option values, or nonstandard padding are common signs of crafted packets; IDS heuristics flag deviations from RFC-defined formats.</li>
+    <li>Exploits: format anomalies are exploited (e.g., malformed TLV fields to trigger parser bugs). Capture-based analysis must include reassembly and normalization to detect such payloads.</li>
+    <li>Forensics: preserve raw captures with timestamps; reparse with multiple decoders (libpcap, custom parsers) to detect discrepancies in interpretation.</li>
+  </ul>
+
+  <h5>Size</h5>
+  <p><strong>Operational prose:</strong><br>
+  Size constraints operate across layers: MTU determines largest frame payload; MSS (TCP) determines segment payload taking headers and options into account; application payload sizes influence fragmentation and segmentation.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Artifacts: fragmentation patterns (overlapping fragments, excessive fragmentation) are used to evade signature-based detection (fragmentation overlap attacks). Monitor DF bit behavior and Path MTU Discovery failures.</li>
+    <li>Indicators: many small packets (small MSS) can indicate either application behavior (interactive) or attempts to exhaust per-flow state (state-exhaustion attacks).</li>
+    <li>Investigation: reconstruct reassembled PDUs; verify whether fragmentation conforms to standards and whether fragments are maliciously overlapped or reordered.</li>
+  </ul>
+
+  <h5>Timing</h5>
+  <p><strong>Operational prose:</strong><br>
+  Timing encompasses inter-packet intervals, retransmission timers, RTT measurements, and protocol timers (e.g., TCP RTO, TCB timeouts, ARP cache expiry). Timing controls reliability and performance and is often exploited by attackers.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Observables: RTT time series, retransmit counts, delayed ACK patterns, and flow durations. Sudden RTO spikes indicate congestion or path change.</li>
+    <li>Attack detection: timing side-channel attacks, slowloris (slow HTTP requests), or deliberate jitter injection to disrupt real-time apps. Time-correlated anomalies across hosts often indicate systemic issues.</li>
+    <li>Parameter specifics: TCP RTO calculation uses Smoothed RTT (SRTT) and RTT variance (RTTVAR); miscalculated RTOs produce spurious retransmits or stalls.</li>
+  </ul>
+
+  <blockquote>Foundational maxim: Timing is a protocol's second state machine—format and size define the unit, timing defines the rhythm.</blockquote>
+
+  <hr />
+
+  <h4>Unicast, Multicast, and Broadcast (4.1.2.5)</h4>
+  <p><strong>Operational prose:</strong><br>
+  These are delivery semantics. Unicast targets a single destination, multicast targets group addresses with optimized replication, and broadcast targets all nodes on a broadcast domain. Each behaves differently at L2/L3 and when traversing routers or SDN controllers.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Unicast: typical flow logs, per-destination flow accounting. Anomalous unicast patterns: scanning (many dest IPs, single source) or exfiltration (sustained upload to single external IP).</li>
+    <li>Multicast: requires IGMP/MLD and multicast routing (PIM). Analysts inspect IGMP join/leave messages; unexpected joins or unauthorized multicast sources may be abused for reflection or traffic amplification.</li>
+    <li>Broadcast: ARP scams, broadcast storms manifest as high broadcast packet rates causing saturated link counters. Broadcast-based attacks can be used for LAN enumeration or amplification.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Unicast: controllers program exact match rules for per-host flows; can implement fine-grained access control lists.</li>
+    <li>Multicast: SDN simplifies multicast by installing group table entries for replication or by using controller-based multicast trees; dynamic group membership is handled via controller orchestration.</li>
+    <li>Broadcast: Controllers can snoop and suppress broadcast floods by installing broadcast-limiting rules or by converting broadcast semantics to controller-mediated replication (reducing storm risk).</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr><th>Property</th><th>Unicast</th><th>Multicast</th><th>Broadcast</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Delivery semantics</td><td>One-to-one</td><td>One-to-many (group)</td><td>One-to-all (broadcast domain)</td></tr>
+      <tr><td>Layer</td><td>L3/L2</td><td>L3 (IP multicast) + L2 mapping</td><td>L2 broadcast</td></tr>
+      <tr><td>Discovery / Membership</td><td>None</td><td>IGMP/MLD, PIM</td><td>Not required</td></tr>
+      <tr><td>Router traversal</td><td>Normal routing</td><td>Requires multicast routing or replication</td><td>Not forwarded by routers by default</td></tr>
+      <tr><td>SDN handling</td><td>Exact flows</td><td>Group tables / controller trees</td><td>Controller filters or replication</td></tr>
+      <tr><td>Security concerns</td><td>Scans, exfiltration</td><td>Unauthorized joins, reflection</td><td>Storms, ARP spoofing</td></tr>
+    </tbody>
+  </table>
+
+  <hr />
+
+  <h4>Reference Models (4.1.2.6)</h4>
+
+  <h5>The OSI Reference Model</h5>
+  <p><strong>Operational prose:</strong><br>
+  OSI defines seven conceptual layers (Physical, Data Link, Network, Transport, Session, Presentation, Application). It formalizes interfaces and PDU lifecycle but is a modelling tool rather than a prescriptive implementation in many networks.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Layered logs: each layer creates artifacts: PHY (interface counters), L2 (MAC tables), L3 (routing logs), L4 (TCP status), L7 (application logs).</li>
+    <li>Threat mapping: map attacks to layers—e.g., MAC spoofing (L2), IP spoofing/BGP hijack (L3), SYN flood (L4), SQL injection (L7). Security controls should be applied at multiple layers to provide defense in depth.</li>
+    <li>Reassembly and normalization: IDS must reassemble PDUs across multiple layers (IP fragments → TCP segments → application messages) to detect layered exploits.</li>
+  </ul>
+
+  <h5>SDN Paradigm:</h5>
+  <p>Practical mapping: SDN collapses several OSI concerns into programmable flows; control plane corresponds to OSI management layers; data plane corresponds to L2/L3 forwarding. Controllers may present abstracted “northbound” APIs representing combined layer functionality.</p>
+
+  <h5>The TCP/IP Protocol Model</h5>
+  <p><strong>Operational prose:</strong><br>
+  TCP/IP uses fewer layers: Link (Network Interface), Internet (IP), Transport (TCP/UDP), Application (HTTP/DNS/etc.). The model maps directly to deployed stacks and is operationally predominant.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Pragmatics: analysts work primarily with TCP/IP due to real-world traffic; map OSI conceptual layers into TCP/IP when investigating.</li>
+    <li>Forensics: packet captures are interpreted according to this model; TCP state machine analysis and IP-layer routing behavior are core.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Controller design: SDN’s abstractions align with TCP/IP layers—flow rules target L2/L3/L4 headers; application-layer considerations are handled at higher-level controllers or application-specific proxies.</li>
+  </ul>
+
+  <table>
+    <thead>
+      <tr><th>Concept</th><th>OSI Layer</th><th>Typical TCP/IP Equivalent</th><th>Primary PDU</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Physical</td><td>1</td><td>Network Interface (PHY)</td><td>Bits</td></tr>
+      <tr><td>Data Link</td><td>2</td><td>Network Interface (Ethernet)</td><td>Frame</td></tr>
+      <tr><td>Network</td><td>3</td><td>Internet (IP)</td><td>Packet</td></tr>
+      <tr><td>Transport</td><td>4</td><td>Transport (TCP/UDP)</td><td>Segment / Datagram</td></tr>
+      <tr><td>Session</td><td>5</td><td>Application session semantics</td><td>-</td></tr>
+      <tr><td>Presentation</td><td>6</td><td>Encoding / encryption (TLS)</td><td>-</td></tr>
+      <tr><td>Application</td><td>7</td><td>Application protocols (HTTP)</td><td>Data</td></tr>
+    </tbody>
+  </table>
+
+  <blockquote>Foundational maxim: Understand the map before you chase symptoms — the same symptom (e.g., packet loss) looks different at each layer.</blockquote>
+
+  <hr />
+
+  <h4>Three Addresses (4.1.2.7)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Networking uses multiple addressing scopes: physical (MAC) for L2 local delivery, network (IP) for end-to-end routing, and application (port, URI, user ID) for service demultiplexing and identity. Proper mapping between them (ARP, NDP, NAT) is essential.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Observable mappings: ARP cache contents, NAT translations (ip:port &lt;-&gt; external ip:port), and socket tables (local:port -&gt; PID). Correlate logs across these mappings to attribute flows to processes and users.</li>
+    <li>Exploits: ARP spoofing changes L2-&gt;L3 mapping; NAT logs provide necessary attribution in NATted environments. Missing or inconsistent mappings (e.g., IP seen but no ARP entry) can indicate spoofing or tunneling.</li>
+    <li>Forensics practice: track tuple (src MAC, src IP, src port) over time; use switch port to MAC mappings to localize endpoints.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Controller-managed addressing: SDN can maintain host-to-location maps, reducing reliance on broadcast ARP storms by answering ARP via controller and populating flow tables.</li>
+    <li>NAT and virtualization: controllers orchestrate overlay addressing (VXLAN/NVGRE) and maintain mapping between underlay IPs and overlay VTEP addresses.</li>
+  </ul>
+
+  <p><strong>PDU lifecycle mapping:</strong><br>
+  Bits → Frames (L2: MAC src/dst, Ethertype) → Packets (L3: IP src/dst, TTL, protocol) → Segments (L4: TCP/UDP ports, seq/ack) → Data (L7 application payload).</p>
+
+  <hr />
+
+  <h4>Encapsulation (4.1.2.8)</h4>
+  <p><strong>Operational prose:</strong><br>
+  Encapsulation wraps higher-layer PDUs inside lower-layer frames: application data inside TCP segments inside IP packets inside Ethernet frames. Each encapsulation adds headers/trailers and possibly transforms or fragments payloads.</p>
+
+  <p><strong>Cybersecurity Analyst View:</strong></p>
+  <ul>
+    <li>Detection: track headers added/removed by NAT, VPN, or tunneling (GRE, IPsec, VXLAN). Encapsulation can hide inner protocol characteristics; nested encapsulation complicates IDS signature matching.</li>
+    <li>Abuse: tunneling protocols are used to evade controls (e.g., HTTP tunneling, DNS tunneling); packet inspection must be able to decapsulate and inspect inner payloads to detect covert channels.</li>
+    <li>Forensics: preserve original encapsulation order in captures; examine outer headers for routing artifacts and inner headers for malicious content.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm:</strong></p>
+  <ul>
+    <li>Overlay/underlay: SDN manages overlays (e.g., VXLAN) by programming VTEP behavior; controller maintains mapping of virtual to physical endpoints.</li>
+    <li>Match-action and encapsulation: programmable match on outer encapsulation fields or perform de-encapsulation at edge devices; controllers can selectively de-encapsulate and apply L7 policies.</li>
+  </ul>
+
+  <p><strong>Detailed PDU lifecycle example:</strong></p>
+  <ol>
+    <li>Application layer: HTTP GET (Data)</li>
+    <li>Transport layer: TCP segment with src/dst ports, seq/ack, window</li>
+    <li>Network layer: IP packet with src/dst IP, TTL, fragmentation flags</li>
+    <li>Data link layer: Ethernet frame with src/dst MAC, VLAN tag</li>
+    <li>Physical: bits transmitted over medium</li>
+  </ol>
+
+  <hr />
+
+  <h4>Scenario: Sending and Receiving a Web Page (4.1.2.9)</h4>
+  <p><strong>Operational prose (end-to-end sequence with PDUs and timers):</strong></p>
+  <ol>
+    <li>DNS resolution: client issues UDP DNS query (or DNS over TLS/HTTPS) to resolver. PDU: UDP datagram encapsulated in IP packet → Ethernet frame → bits. Timers: DNS client RTO ≈ 1–2 s, with retries; DNS over TLS includes TLS handshake RTTs.</li>
+    <li>TCP three-way handshake (if HTTP over TCP) or QUIC handshake (if HTTP/3 over UDP): TCP: Client sends SYN (seq=x) — server replies SYN/ACK (seq=y, ack=x+1) — client sends ACK (ack=y+1). RTO and backoff apply; RTO computed from SRTT and RTTVAR (RFC 6298). QUIC: 0-RTT/1-RTT handshake reduces latency but possible replay risks; handshake includes TLS 1.3 handshake integrated with transport.</li>
+    <li>TLS handshake (if HTTPS): exchange of ClientHello, ServerHello, certificate, key exchange, finished messages. TLS Record Layers carry handshake messages; session establishment includes key derivation (HKDF), cipher suite negotiation, and potential client and server authentication. Observables: SNI in ClientHello (unless encrypted), JA3 fingerprint, certificate chain. Analysts see TLS handshake flow lengths and ciphers used.</li>
+    <li>HTTP request/response: Client sends GET; server responds with headers and content (often chunked). For large content, TCP segments and possibly application-level chunking and compression (gzip) come into play.</li>
+    <li>Connection teardown and persistence: HTTP/1.1 persistent connections use keep-alive; HTTP/2 multiplexes streams over single connection; HTTP/3 uses QUIC streams over UDP.</li>
+    <li>Caching and CDN interactions: Client may receive cached responses; requests may be redirected to CDN or load balancers.</li>
+  </ol>
+
+  <p><strong>Cybersecurity Analyst View (detection, anomalies, and logs):</strong></p>
+  <ul>
+    <li>DNS stage: unusual resolver IPs or DNS over nonstandard ports — look for NXDOMAIN floods and sudden increases in TXT record queries (tunneling).</li>
+    <li>Handshake stage: mismatched TLS versions, deprecated cipher suites, or suspicious JA3 fingerprints indicate nonstandard clients or malware. Certificate anomalies (short-lived certs, unusual issuers) are red flags.</li>
+    <li>Transport phase: frequent retransmissions, packet reordering, or inconsistent MSS across connections indicate path MTU or middlebox issues. RST storms or half-open connections point to SYN flood or middlebox resets.</li>
+    <li>Application phase: unusual request URIs, header anomalies, or unexpected content-encoding indicate exploitation attempts. HTTP/2 or HTTP/3 unusual stream patterns (stream resets) can point to abused multiplexing.</li>
+    <li>Forensics: correlate server access logs (timestamps, URIs) with packet captures and TLS logs; extract session keys where possible (session tickets or TLS key logs) for deeper analysis.</li>
+  </ul>
+
+  <p><strong>SDN Paradigm (controller actions, telemetry, and enforcement):</strong></p>
+  <ul>
+    <li>Controller pre-provisioning: for known web services, controller installs proactive flow rules for VIPs, ARP/ND snooping, and route selection to CDN egress points.</li>
+    <li>Reactive control: first packet of new flow triggers Packet-In; controller authorizes and pushes a Flow-Mod to install match-action rules that handle subsequent packets at wire speed.</li>
+    <li>Service chaining and inspection: controller may route the flow through an inline TLS proxy for inspection then to the appropriate backend pool; group table entries enable load balancing across server instances.</li>
+    <li>Telemetry & adaptation: controller collects per-flow counters (packets/bytes, duration) and RTT estimates; anomalous handshake latencies or repeated packet-in events trigger adaptive policies (e.g., increase sampling, divert to scrubbing service).</li>
+    <li>Failure handling: if middlebox or server responds with unexpected RSTs, controller can reroute flows, update flow-table entries, or temporarily blacklist a problematic backend.</li>
+  </ul>
+
+  <p><strong>Detailed timer and window specifics involved:</strong></p>
+  <ul>
+    <li>DNS: client RTO ~1s, exponential backoff; resolver limits UDP query rates.</li>
+    <li>TCP handshake: SYN retransmit timers start at RTO; typical initial RTO ~1s (OS-dependent); client cwnd initial (IW) typically 10 segments (RFC 6928) for modern stacks; advertised window and SACK options influence recovery.</li>
+    <li>TCP congestion control: SRTT influences cwnd growth; slow start to congestion avoidance with Reno/Cubic algorithms; fast retransmit triggered by 3 duplicate ACKs; fast recovery algorithms manage cwnd reduction.</li>
+    <li>TLS: handshake includes retransmission timers; TLS record retransmits are handled by underlying transport; TLS 1.3 truncates handshake steps reducing RTTs.</li>
+    <li>QUIC: integrates congestion and loss recovery with faster connections and 0-RTT possibilities; connection IDs enable mobility through NATs.</li>
+  </ul>
+
+  <p><strong>Attack and anomaly scenarios and how they appear:</strong></p>
+  <ul>
+    <li>SYN flood: high SYN rate with low ACKs; server SYN queue fill-up; NetFlow shows high half-open flows; SDN reacts by rate-limiting SYNs or offloading to SYN proxies.</li>
+    <li>Fragmentation overlap: packet fragments with overlapping offsets used to bypass IDS; reassembly logs inconsistent or show payloads that match exploit signatures only after normalization.</li>
+    <li>TLS downgrade: client/server advertise lower ciphers; logs show deprecated ciphers negotiated; JA3/JA3S mismatch indicates TLS manipulation.</li>
+    <li>DNS tunneling: elevated TXT or long subdomain queries; flow logs reveal many small DNS requests with data-like payloads; SDN can enforce DNS egress filtering.</li>
+  </ul>
+
+  <p><strong>Step-by-step PDU example (single HTTP GET over HTTPS):</strong></p>
+  <ol>
+    <li>L7: "GET /index.html HTTP/1.1\r\nHost: example.com\r\n..."</li>
+    <li>L4: TCP segment srcPort=54321 dstPort=443, seq=1000, ack=0, flags=SYN, window=65535, options=MSS=1460,SACKOK,TS</li>
+    <li>L3: IP packet src=10.0.0.5 dst=93.184.216.34, TTL=64, protocol=6</li>
+    <li>L2: Ethernet frame srcMAC=00:11:22:33:44:55 dstMAC=66:77:88:99:AA:BB ethertype=0x0800</li>
+    <li>Physical: bits transmitted over fiber/copper/wireless medium</li>
+  </ol>
+
+  <p><strong>Forensic reconstruction:</strong></p>
+  <ul>
+    <li>Align timestamps from client logs, switch port ingress timestamps, and server logs to compute per-hop delays and to localize whether delays originate at access, last-mile, or server processing.</li>
+    <li>Use TCP sequence and ACK numbers, along with SRTT evolution, to reconstruct retransmits and congestion behavior.</li>
+  </ul>
+
+  <hr />
+  <p><em>End of module.</em></p>
+</article>
+</body>
+</html>

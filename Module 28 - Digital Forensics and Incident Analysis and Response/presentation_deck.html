@@ -1,0 +1,2684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>University of Zululand | Cisco CyberOps Associate: Module 28 - Incident Response Models</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {{
+      /* Official University of Zululand (UNIZULU) Blue & White Brand System */
+      --unizulu-navy: #002855;
+      --unizulu-navy-deep: #001833;
+      --unizulu-blue: #1d4ed8;
+      --unizulu-royal: #2563eb;
+      --unizulu-sky: #0284c7;
+      --unizulu-ice: #e0f2fe;
+      --unizulu-gold: #d97706;
+      --unizulu-gold-bright: #f59e0b;
+      --unizulu-gold-light: #fef3c7;
+      --unizulu-gold-dark: #92400e;
+
+      /* UI Theme: Light Blue & White (Default) */
+      --bg-page: #edf2f9;
+      --bg-header: #002855;
+      --bg-footer: #002855;
+      --bg-card: #ffffff;
+      --bg-card-subtle: #f8fafc;
+      --border-card: rgba(0, 40, 85, 0.14);
+      --border-accent: rgba(217, 119, 6, 0.45);
+      
+      --text-main: #0f172a;
+      --text-body: #1e293b;
+      --text-muted: #64748b;
+      --text-light: #ffffff;
+      --text-gold: #b45309;
+
+      /* Card Shadows */
+      --shadow-slide: 0 16px 40px -10px rgba(0, 40, 85, 0.15), 0 0 0 1px rgba(0, 40, 85, 0.06);
+      --shadow-card: 0 4px 14px rgba(0, 40, 85, 0.05);
+      --shadow-hover: 0 10px 25px rgba(0, 40, 85, 0.12);
+      --glow-gold: 0 0 18px rgba(245, 158, 11, 0.35);
+      --glow-blue: 0 0 18px rgba(29, 78, 216, 0.25);
+    }}
+
+    /* High-contrast Midnight Navy Mode */
+    body.dark-mode {{
+      --bg-page: #040d1a;
+      --bg-header: #030a14;
+      --bg-footer: #030a14;
+      --bg-card: #0b1a33;
+      --bg-card-subtle: #0f2347;
+      --border-card: rgba(56, 189, 248, 0.2);
+      --border-accent: rgba(245, 158, 11, 0.45);
+      
+      --text-main: #f8fafc;
+      --text-body: #cbd5e1;
+      --text-muted: #94a3b8;
+      --text-light: #ffffff;
+      --text-gold: #fbbf24;
+
+      --shadow-slide: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 25px rgba(0, 40, 85, 0.5);
+      --shadow-card: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-hover: 0 10px 30px rgba(56, 189, 248, 0.18);
+    }}
+
+    * {{
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }}
+
+    body {{
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+      display: flex;
+      flex-direction: column;
+      user-select: none;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }}
+
+    /* Subtle Architectural Grid Background */
+    .unizulu-bg {{
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 12% 15%, rgba(0, 40, 85, 0.08) 0%, transparent 45%),
+        radial-gradient(circle at 88% 85%, rgba(245, 158, 11, 0.06) 0%, transparent 45%),
+        linear-gradient(rgba(0, 40, 85, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 40, 85, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+      z-index: 0;
+      pointer-events: none;
+    }}
+
+    body.dark-mode .unizulu-bg {{
+      background: 
+        radial-gradient(circle at 10% 12%, rgba(29, 78, 216, 0.16) 0%, transparent 48%),
+        radial-gradient(circle at 90% 88%, rgba(245, 158, 11, 0.1) 0%, transparent 48%),
+        linear-gradient(rgba(245, 158, 11, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(37, 99, 235, 0.025) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 36px 36px, 36px 36px;
+    }}
+
+    /* Header with UNIZULU Identity */
+    header {{
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 2.5rem;
+      border-bottom: 3px solid var(--unizulu-gold-bright);
+      background: var(--bg-header);
+      color: #ffffff;
+      box-shadow: 0 4px 18px rgba(0, 40, 85, 0.25);
+    }}
+
+    .header-brand {{
+      display: flex;
+      align-items: center;
+      gap: 1.1rem;
+    }}
+
+    .unizulu-crest-header {{
+      height: 42px;
+      width: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+      transition: transform 0.2s ease;
+    }}
+
+    .unizulu-crest-header:hover {{
+      transform: scale(1.06);
+    }}
+
+    .badge {{
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.6);
+      padding: 0.35rem 0.85rem;
+      border-radius: 9999px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }}
+
+    .badge-dot {{
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--unizulu-gold-bright);
+      box-shadow: 0 0 8px var(--unizulu-gold-bright);
+    }}
+
+    .deck-meta {{
+      font-size: 0.85rem;
+      color: var(--unizulu-gold-light);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }}
+
+    .deck-meta span {{
+      color: rgba(255, 255, 255, 0.4);
+    }}
+
+    .progress-bar-container {{
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: rgba(0, 0, 0, 0.2);
+    }}
+
+    .progress-bar {{
+      height: 100%;
+      width: 3.8%;
+      background: linear-gradient(90deg, #38bdf8, var(--unizulu-gold-bright));
+      transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+    }}
+
+    /* Main Viewport */
+    main {{
+      position: relative;
+      z-index: 5;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.25rem 2.5rem;
+    }}
+
+    /* Slide Card with UNIZULU Badge Watermark Background */
+    .slide {{
+      display: none;
+      position: relative;
+      width: 100%;
+      max-width: 1260px;
+      height: 87%;
+      max-height: 760px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 18px;
+      padding: 2.25rem 2.75rem;
+      box-shadow: var(--shadow-slide);
+      overflow-y: auto;
+      animation: slideIn 0.25s ease-out forwards;
+    }}
+
+    /* Watermark Badge Background for University of Zululand */
+    .slide::before {{
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 480px;
+      height: 480px;
+      background-image: url('unizulu_logo.svg');
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: contain;
+      opacity: 0.052;
+      pointer-events: none;
+      z-index: 0;
+    }}
+
+    body.dark-mode .slide::before {{
+      opacity: 0.045;
+      filter: drop-shadow(0 0 15px rgba(245, 158, 11, 0.3));
+    }}
+
+    .slide.active {{
+      display: flex;
+      flex-direction: column;
+    }}
+
+    /* Ensure child content floats above the badge background */
+    .slide > * {{
+      position: relative;
+      z-index: 1;
+    }}
+
+    @keyframes slideIn {{
+      from {{
+        opacity: 0;
+        transform: translateY(10px) scale(0.995);
+      }}
+      to {{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }}
+    }}
+
+    /* Slide Header Components */
+    .slide-header-flex {{
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.85rem;
+    }}
+
+    .slide-crest-badge {{
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.75rem;
+      background: rgba(0, 40, 85, 0.06);
+      border: 1px solid rgba(0, 40, 85, 0.15);
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--unizulu-navy);
+    }}
+
+    body.dark-mode .slide-crest-badge {{
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(245, 158, 11, 0.3);
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .unizulu-badge-icon {{
+      height: 20px;
+      width: auto;
+      object-fit: contain;
+    }}
+
+    .slide-tag {{
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--unizulu-blue);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 0.35rem;
+    }}
+
+    body.dark-mode .slide-tag {{
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .slide-title {{
+      font-size: 1.95rem;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.22;
+      margin-bottom: 1.15rem;
+      letter-spacing: -0.02em;
+    }}
+
+    .slide-title span {{
+      color: var(--unizulu-blue);
+      background: linear-gradient(135deg, var(--unizulu-navy) 0%, var(--unizulu-blue) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }}
+
+    body.dark-mode .slide-title span {{
+      background: linear-gradient(135deg, var(--unizulu-gold-bright) 0%, #38bdf8 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }}
+
+    /* Grids & Cards */
+    .grid-2 {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.35rem;
+      flex: 1;
+    }}
+
+    .grid-3 {{
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.2rem;
+      flex: 1;
+    }}
+
+    .grid-4 {{
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.95rem;
+      flex: 1;
+    }}
+
+    .card {{
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 1.15rem 1.25rem;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      box-shadow: var(--shadow-card);
+      transition: all 0.22s ease;
+    }}
+
+    .card:hover {{
+      border-color: var(--unizulu-blue);
+      box-shadow: var(--shadow-hover);
+      transform: translateY(-2px);
+    }}
+
+    body.dark-mode .card:hover {{
+      border-color: var(--unizulu-gold-bright);
+    }}
+
+    .card-icon {{
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      margin-bottom: 0.65rem;
+      background: rgba(0, 40, 85, 0.08);
+      border: 1px solid rgba(0, 40, 85, 0.16);
+      color: var(--unizulu-navy);
+    }}
+
+    body.dark-mode .card-icon {{
+      background: rgba(245, 158, 11, 0.15);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .card h3 {{
+      font-size: 1.02rem;
+      font-weight: 700;
+      margin-bottom: 0.35rem;
+      color: var(--unizulu-navy);
+    }}
+
+    body.dark-mode .card h3 {{
+      color: #ffffff;
+    }}
+
+    .card p, .card li {{
+      font-size: 0.85rem;
+      color: var(--text-body);
+      line-height: 1.55;
+    }}
+
+    .card ul {{
+      list-style-type: none;
+      margin-top: 0.35rem;
+    }}
+
+    .card ul li {{
+      position: relative;
+      padding-left: 1.15rem;
+      margin-bottom: 0.35rem;
+    }}
+
+    .card ul li::before {{
+      content: "▹";
+      position: absolute;
+      left: 0;
+      color: var(--unizulu-blue);
+      font-weight: bold;
+    }}
+
+    body.dark-mode .card ul li::before {{
+      color: var(--unizulu-gold-bright);
+    }}
+
+    /* Master Diagram Showcase Layout */
+    .diagram-layout {{
+      display: grid;
+      grid-template-columns: 1.35fr 1fr;
+      gap: 1.25rem;
+      flex: 1;
+      align-items: center;
+      margin-bottom: 0.85rem;
+    }}
+
+    .diagram-showcase {{
+      position: relative;
+      background: var(--bg-card-subtle);
+      border: 2px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.75rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: zoom-in;
+      transition: all 0.25s ease;
+      box-shadow: var(--shadow-card);
+    }}
+
+    .diagram-showcase:hover {{
+      border-color: var(--unizulu-blue);
+      box-shadow: 0 12px 30px rgba(0, 40, 85, 0.16);
+      transform: translateY(-2px);
+    }}
+
+    .diagram-hero-img {{
+      width: 100%;
+      height: auto;
+      max-height: 420px;
+      object-fit: contain;
+      border-radius: 8px;
+    }}
+
+    .diagram-zoom-hint {{
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      background: rgba(0, 40, 85, 0.88);
+      color: #ffffff;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      pointer-events: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }}
+
+    .diagram-sidebar-cards {{
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      justify-content: center;
+    }}
+
+    /* Diagrams in Standard Slides */
+    .diagram-box {{
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 0.85rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0, 40, 85, 0.04);
+    }}
+
+    .diagram-svg {{
+      width: 100%;
+      height: auto;
+      max-height: 330px;
+    }}
+
+    /* Volatility Stack */
+    .volatility-stack {{
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+      width: 100%;
+    }}
+
+    .volatility-row {{
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0.95rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border: 1px solid rgba(0, 40, 85, 0.1);
+      transition: transform 0.2s ease;
+    }}
+
+    .volatility-row:hover {{
+      transform: translateX(4px);
+    }}
+
+    .vr-1 {{ background: #ffe4e6; border-color: #f43f5e; color: #9f1239; }}
+    .vr-2 {{ background: #ffedd5; border-color: #f97316; color: #9a3412; }}
+    .vr-3 {{ background: #fef9c3; border-color: #eab308; color: #854d0e; }}
+    .vr-4 {{ background: #e0f2fe; border-color: #0ea5e9; color: #075985; }}
+    .vr-5 {{ background: #dbeafe; border-color: #3b82f6; color: #1e40af; }}
+    .vr-6 {{ background: #f3e8ff; border-color: #a855f7; color: #6b21a8; }}
+    .vr-7 {{ background: #f1f5f9; border-color: #94a3b8; color: #334155; }}
+
+    body.dark-mode .vr-1 {{ background: rgba(244, 63, 94, 0.2); border-color: rgba(244, 63, 94, 0.6); color: #fda4af; }}
+    body.dark-mode .vr-2 {{ background: rgba(245, 158, 11, 0.2); border-color: rgba(245, 158, 11, 0.6); color: #fde68a; }}
+    body.dark-mode .vr-3 {{ background: rgba(251, 191, 36, 0.18); border-color: rgba(251, 191, 36, 0.5); color: #fef08a; }}
+    body.dark-mode .vr-4 {{ background: rgba(56, 189, 248, 0.18); border-color: rgba(56, 189, 248, 0.5); color: #7dd3fc; }}
+    body.dark-mode .vr-5 {{ background: rgba(37, 99, 235, 0.2); border-color: rgba(37, 99, 235, 0.6); color: #93c5fd; }}
+    body.dark-mode .vr-6 {{ background: rgba(192, 132, 252, 0.18); border-color: rgba(192, 132, 252, 0.5); color: #d8b4fe; }}
+    body.dark-mode .vr-7 {{ background: rgba(148, 163, 184, 0.15); border-color: rgba(148, 163, 184, 0.4); color: #cbd5e1; }}
+
+    .volatility-badge {{
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      padding: 0.15rem 0.55rem;
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.08);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }}
+
+    body.dark-mode .volatility-badge {{
+      background: rgba(0, 0, 0, 0.5);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }}
+
+    /* Kill Chain Steps */
+    .kc-steps {{
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      width: 100%;
+    }}
+
+    .kc-step {{
+      background: var(--bg-card-subtle);
+      border: 1px solid var(--border-card);
+      border-left: 4px solid var(--unizulu-blue);
+      border-radius: 8px;
+      padding: 0.55rem 0.9rem;
+      font-size: 0.83rem;
+    }}
+
+    body.dark-mode .kc-step {{
+      border-left-color: var(--unizulu-gold-bright);
+    }}
+
+    .kc-step-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.25rem;
+    }}
+
+    .kc-step-num {{
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: var(--unizulu-blue);
+      font-size: 0.78rem;
+    }}
+
+    body.dark-mode .kc-step-num {{
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .kc-step-title {{
+      font-weight: 700;
+      color: var(--text-main);
+      font-size: 0.88rem;
+    }}
+
+    .kc-details {{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-body);
+      line-height: 1.4;
+    }}
+
+    .kc-adversary {{
+      color: #b91c1c;
+    }}
+    body.dark-mode .kc-adversary {{
+      color: #fda4af;
+    }}
+
+    .kc-defense {{
+      color: #15803d;
+    }}
+    body.dark-mode .kc-defense {{
+      color: #86efac;
+    }}
+
+    /* In-Slide Toggleable Course Notes */
+    .course-notes-toggle {{
+      margin-top: 0.85rem;
+      background: rgba(0, 40, 85, 0.05);
+      border: 1px solid rgba(0, 40, 85, 0.2);
+      border-radius: 8px;
+      padding: 0.45rem 0.85rem;
+      font-size: 0.8rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      color: var(--unizulu-navy);
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      transition: all 0.2s ease;
+      width: fit-content;
+    }}
+
+    .course-notes-toggle:hover {{
+      background: rgba(29, 78, 216, 0.12);
+      border-color: var(--unizulu-blue);
+      color: var(--unizulu-blue);
+    }}
+
+    body.dark-mode .course-notes-toggle {{
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.35);
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .course-notes-body {{
+      display: none;
+      margin-top: 0.45rem;
+      padding: 0.85rem 1rem;
+      background: #f1f5f9;
+      border: 1px solid rgba(0, 40, 85, 0.14);
+      border-left: 3px solid var(--unizulu-blue);
+      border-radius: 8px;
+      font-size: 0.82rem;
+      color: var(--text-body);
+      line-height: 1.55;
+    }}
+
+    body.dark-mode .course-notes-body {{
+      background: rgba(0, 0, 0, 0.55);
+      border-color: rgba(245, 158, 11, 0.25);
+      border-left-color: var(--unizulu-gold-bright);
+      color: #e2e8f0;
+    }}
+
+    .course-notes-body.open {{
+      display: block;
+      animation: notePop 0.2s ease-out;
+    }}
+
+    @keyframes notePop {{
+      from {{ opacity: 0; transform: translateY(6px); }}
+      to {{ opacity: 1; transform: translateY(0); }}
+    }}
+
+    /* Speaker Notes Drawer */
+    .notes-drawer {{
+      position: fixed;
+      bottom: 68px;
+      right: 32px;
+      width: 500px;
+      background: #ffffff;
+      border: 2px solid var(--unizulu-navy);
+      box-shadow: 0 20px 45px rgba(0, 40, 85, 0.3);
+      border-radius: 14px;
+      padding: 1.25rem 1.5rem;
+      z-index: 50;
+      display: none;
+      backdrop-filter: blur(18px);
+    }}
+
+    body.dark-mode .notes-drawer {{
+      background: rgba(10, 23, 46, 0.98);
+      border-color: rgba(245, 158, 11, 0.5);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.8), var(--glow-gold);
+    }}
+
+    .notes-drawer.open {{
+      display: block;
+      animation: notePop 0.2s ease-out;
+    }}
+
+    .notes-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.45rem;
+      border-bottom: 1px solid rgba(0, 40, 85, 0.15);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+      color: var(--unizulu-navy);
+      font-weight: 700;
+    }}
+
+    body.dark-mode .notes-header {{
+      border-color: rgba(245, 158, 11, 0.25);
+      color: var(--unizulu-gold-bright);
+    }}
+
+    .notes-content {{
+      font-size: 0.85rem;
+      color: var(--text-body);
+      line-height: 1.6;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-line;
+    }}
+
+    /* Lightbox Modal for High-Resolution Diagram Inspection */
+    .lightbox-modal {{
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 24, 51, 0.92);
+      backdrop-filter: blur(12px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      padding: 2rem;
+    }}
+
+    .lightbox-modal.open {{
+      display: flex;
+      animation: fadeIn 0.2s ease-out;
+    }}
+
+    @keyframes fadeIn {{
+      from {{ opacity: 0; transform: scale(0.98); }}
+      to {{ opacity: 1; transform: scale(1); }}
+    }}
+
+    .lightbox-header {{
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 1100px;
+      margin-bottom: 0.75rem;
+      color: #ffffff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+      font-weight: 700;
+    }}
+
+    .lightbox-close {{
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: #ffffff;
+      padding: 0.35rem 0.85rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }}
+
+    .lightbox-close:hover {{
+      background: var(--unizulu-gold-bright);
+      color: #000;
+    }}
+
+    .lightbox-img {{
+      max-width: 95vw;
+      max-height: 85vh;
+      border-radius: 12px;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(245, 158, 11, 0.3);
+      border: 2px solid var(--unizulu-gold-bright);
+      object-fit: contain;
+    }}
+
+    /* Footer Navigation */
+    footer {{
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 2.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.15);
+      background: var(--bg-footer);
+      color: #ffffff;
+      box-shadow: 0 -4px 18px rgba(0, 40, 85, 0.2);
+    }}
+
+    .controls {{
+      display: flex;
+      gap: 0.65rem;
+      align-items: center;
+    }}
+
+    .btn {{
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+      padding: 0.45rem 0.95rem;
+      border-radius: 7px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: all 0.2s ease;
+      font-family: 'Inter', sans-serif;
+    }}
+
+    .btn:hover {{
+      background: rgba(255, 255, 255, 0.25);
+      border-color: var(--unizulu-gold-bright);
+      color: var(--unizulu-gold-light);
+    }}
+
+    .btn-primary {{
+      background: var(--unizulu-gold-bright);
+      color: #002855;
+      border-color: var(--unizulu-gold-bright);
+      font-weight: 700;
+    }}
+
+    .btn-primary:hover {{
+      background: #fbbf24;
+      color: #001833;
+      box-shadow: 0 0 15px rgba(245, 158, 11, 0.6);
+    }}
+
+    .slide-counter {{
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.86rem;
+      color: var(--unizulu-gold-light);
+      padding: 0 0.5rem;
+      font-weight: 600;
+    }}
+
+    .keyboard-hint {{
+      font-size: 0.74rem;
+      color: rgba(255, 255, 255, 0.6);
+      font-family: 'JetBrains Mono', monospace;
+    }}
+
+    .key {{
+      display: inline-block;
+      padding: 0.1rem 0.35rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      color: #ffffff;
+    }}
+
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar {{
+      width: 6px;
+      height: 6px;
+    }}
+    ::-webkit-scrollbar-track {{
+      background: rgba(0, 40, 85, 0.05);
+    }}
+    ::-webkit-scrollbar-thumb {{
+      background: rgba(0, 40, 85, 0.25);
+      border-radius: 3px;
+    }}
+    ::-webkit-scrollbar-thumb:hover {{
+      background: var(--unizulu-blue);
+    }}
+  </style>
+</head>
+<body>
+
+  <div class="unizulu-bg"></div>
+
+  <!-- Header with UNIZULU Crest & Theme -->
+  <header>
+    <div class="header-brand">
+      <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="University of Zululand Logo" class="unizulu-crest-header">
+      <div class="badge">
+        <span class="badge-dot"></span>
+        UNIVERSITY OF ZULULAND | Module 28
+      </div>
+    </div>
+    <div class="deck-meta">
+      <strong>Incident Response Models</strong>
+      <span>•</span>
+      <em>Diligentia Crescimus</em>
+    </div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </header>
+
+  <!-- Presentation Viewport -->
+  <main>
+
+    <!-- Slide 1: [Original 1] -->
+    <div class="slide active" id="slide-1" data-notes="Welcome to Module 28: Incident Response Models, presented under the academic excellence of the University of Zululand. In previous modules, you learned about attack vectors, defensive tools, and threat detection. In this capstone module, we answer the ultimate question: What do you do when an attack actually happens? We explore the 4 pillars: Evidence Handling, The Cyber Kill Chain, The Diamond Model of Intrusion Analysis, and Incident Response procedures under NIST SP 800-61r2.">
+<!-- UNIZULU Hero Header -->
+      <div style="display: flex; align-items: center; gap: 1.4rem; margin-bottom: 1.2rem; padding-bottom: 1rem; border-bottom: 1px solid rgba(245, 158, 11, 0.2);">
+        <div style="width: 76px; height: 76px; border-radius: 14px; background: rgba(0, 40, 85, 0.65); border: 2px solid var(--unizulu-gold); display: flex; align-items: center; justify-content: center; padding: 6px; box-shadow: var(--glow-gold); backdrop-filter: blur(10px);">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Crest" style="width: 100%; height: 100%; object-fit: contain;">
+        </div>
+        <div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-size: 0.84rem; font-weight: 700; color: var(--unizulu-gold-bright); letter-spacing: 0.12em; text-transform: uppercase;">
+            UNIVERSITY OF ZULULAND • A NODE FOR AFRICAN THOUGHT
+          </div>
+          <div style="font-size: 0.88rem; color: #cbd5e1; font-weight: 500;">
+            Faculty of Science, Agriculture and Technology • Department of Computer Science
+          </div>
+          <div style="font-size: 0.8rem; color: var(--unizulu-gold-light); font-style: italic;">
+            "Diligentia Crescimus" (By Diligence We Grow) • Cisco CyberOps Associate
+          </div>
+        </div>
+      </div>
+
+      <div class="slide-tag">28.0 Introduction • Module Objectives</div>
+      <h1 class="slide-title">Incident Response <span>Models & Digital Forensics</span></h1>
+      <p style="font-size: 1.05rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5;">
+        You have learned all about the attack vectors and tools to protect your systems. In this final module, you will learn what to do when an attack actually happens.
+      </p>
+
+      <div class="grid-4" style="margin-bottom: 1.2rem;">
+        <div class="card">
+          <div class="card-icon">🔬</div>
+          <h3>28.1 Evidence Handling</h3>
+          <p>Explain the role of digital forensics processes, evidence types, RFC 3227 volatility, chain of custody, and attack attribution.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">⛓️</div>
+          <h3>28.2 Cyber Kill Chain</h3>
+          <p>Identify the 7 sequential stages developed by Lockheed Martin to detect, disrupt, and break an adversary's intrusion.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">💎</div>
+          <h3>28.3 Diamond Model</h3>
+          <p>Classify intrusion events using the 4 core features, 6 meta-features, pivoting across nodes, and attack threading.</p>
+        </div>
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>28.4 Incident Response</h3>
+          <p>Apply NIST 800-61r2 incident handling procedures, CSIRC planning, stakeholder roles, CMMC levels, and post-incident lessons learned.</p>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>Course Objective:</strong> Explain how the CyberOps Associate responds to cybersecurity incidents. Tier 1 cybersecurity analysts are often the first to uncover wrongdoing and must properly preserve evidence, identify indicators of compromise, and attribute attacks to threat actors.
+      </div>
+    </div>
+
+    <!-- Slide 2: 28.1.1 Digital Forensics & Investigations -->
+    </div>
+
+    <!-- Slide 2: Master Diagram ab65b04f-09de-471a-9a89-305270b0ea91.jfif -->
+    </div>
+
+    <!-- Slide 2: Master Diagram ab65b04f-09de-471a-9a89-305270b0ea91.jfif -->
+    <div class="slide" id="slide-2" data-notes="Here is the master architectural roadmap for Cisco CyberOps Associate Module 28. It connects the 4 core learning pillars: Section 28.1 Evidence Handling & Attack Attribution; Section 28.2 The Cyber Kill Chain; Section 28.3 The Diamond Model of Intrusion Analysis; and Section 28.4 Incident Response under NIST SP 800-61r2. Each phase builds upon the previous, preparing the analyst from initial digital forensic collection to executive reporting.">
+      <div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.0 Introduction • Module Architecture Roadmap</div>
+          <h2 class="slide-title">CyberOps: <span>Incident Response Models Roadmap</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('ab65b04f-09de-471a-9a89-305270b0ea91.jfif', '28.0 Introduction • Module Architecture Roadmap')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="ab65b04f-09de-471a-9a89-305270b0ea91.jfif" alt="28.0 Introduction • Module Architecture Roadmap" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Evidence Handling (28.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Explain digital forensics role, volatile evidence order (RFC 3227), legal evidence types, chain of custody, and attribution.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Cyber Kill Chain (28.2)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Identify the 7 stages developed by Lockheed Martin; understand defensive breakpoints to halt adversary campaigns before impact.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Diamond Model (28.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Classify intrusion events using 4 core features and 6 meta-features; correlate complex intrusions through horizontal pivoting.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">4. Incident Response (28.4)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Apply NIST 800-61r2 handling procedures, CSIRC capability governance, CMMC maturity levels, and lessons-learned metrics.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.0 Architecture Roadmap:</strong><br>
+• <strong>28.1 Evidence Handling & Forensics:</strong> Acquisition order, volatile memory preservation, chain of custody, and attack attribution.<br>
+• <strong>28.2 Cyber Kill Chain:</strong> Lockheed Martin 7 sequential attack stages and SOC defensive breakpoints.<br>
+• <strong>28.3 Diamond Model:</strong> Classifying intrusion events across Adversary, Capability, Infrastructure, and Victim, with multi-node pivoting.<br>
+• <strong>28.4 NIST Incident Response:</strong> Preparation, Detection & Analysis, Containment/Eradication/Recovery, and Post-Incident review.
+      </div>
+    </div>
+
+    <!-- Slide 3: [Original 2] -->
+    <div class="slide" id="slide-3" data-notes="Here is the master architectural roadmap for Cisco CyberOps Associate Module 28. It connects the 4 core learning pillars: Section 28.1 Evidence Handling & Attack Attribution; Section 28.2 The Cyber Kill Chain; Section 28.3 The Diamond Model of Intrusion Analysis; and Section 28.4 Incident Response under NIST SP 800-61r2. Each phase builds upon the previous, preparing the analyst from initial digital forensic collection to executive reporting.">
+<div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.0 Introduction • Module Architecture Roadmap</div>
+          <h2 class="slide-title">CyberOps: <span>Incident Response Models Roadmap</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('ab65b04f-09de-471a-9a89-305270b0ea91.jfif', '28.0 Introduction • Module Architecture Roadmap')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="ab65b04f-09de-471a-9a89-305270b0ea91.jfif" alt="28.0 Introduction • Module Architecture Roadmap" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Evidence Handling (28.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Explain digital forensics role, volatile evidence order (RFC 3227), legal evidence types, chain of custody, and attribution.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Cyber Kill Chain (28.2)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Identify the 7 stages developed by Lockheed Martin; understand defensive breakpoints to halt adversary campaigns before impact.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Diamond Model (28.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Classify intrusion events using 4 core features and 6 meta-features; correlate complex intrusions through horizontal pivoting.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">4. Incident Response (28.4)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Apply NIST 800-61r2 handling procedures, CSIRC capability governance, CMMC maturity levels, and lessons-learned metrics.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.0 Architecture Roadmap:</strong><br>
+• <strong>28.1 Evidence Handling & Forensics:</strong> Acquisition order, volatile memory preservation, chain of custody, and attack attribution.<br>
+• <strong>28.2 Cyber Kill Chain:</strong> Lockheed Martin 7 sequential attack stages and SOC defensive breakpoints.<br>
+• <strong>28.3 Diamond Model:</strong> Classifying intrusion events across Adversary, Capability, Infrastructure, and Victim, with multi-node pivoting.<br>
+• <strong>28.4 NIST Incident Response:</strong> Preparation, Detection & Analysis, Containment/Eradication/Recovery, and Post-Incident review.
+      </div>
+    </div>
+
+    <!-- Slide 3: [Original 2] -->
+    </div>
+
+    <!-- Slide 4: Master Diagram f404cbb5-ce19-412b-9313-f04529e11869.jfif -->
+    <div class="slide" id="slide-4" data-notes="This master infographic summarizes Section 28.1 across three core pillars: First, Digital Forensics sources (storage, RAM, network pcaps) and regulatory mandates like HIPAA. Second, the 4-phase forensic process (Collection, Examination, Analysis, Reporting), classifications of legal evidence, and the RFC 3227 Order of Volatility. Third, Data Integrity, Chain of Custody, master volume preservation with write-blockers and bit-level copies, and Attack Attribution via location, malware features, and TTPs.">
+      <div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.1 Evidence Handling • Master Architectural Infographic</div>
+          <h2 class="slide-title">Digital Forensics: <span>Evidence Handling & Attribution</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('f404cbb5-ce19-412b-9313-f04529e11869.jfif', '28.1 Evidence Handling • Master Architectural Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="f404cbb5-ce19-412b-9313-f04529e11869.jfif" alt="28.1 Evidence Handling • Master Architectural Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Digital Forensics (28.1.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Recovers digital evidence; preserves Indicators of Compromise (IoCs); internal vs. public inquiries; certifies breach numbers for HIPAA compliance.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Process & Volatility (28.1.2 - 28.1.6)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">NIST SP 800-86 four phases (Collection, Examination, Analysis, Reporting); Best vs. Corroborating evidence; strict RFC 3227 volatility ladder.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Integrity & Attribution (28.1.7 - 28.1.9)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Unbroken chain of custody logbooks; hardware write-blockers; verified bit-level replicas; attributing attacks via IPs, code features, and MITRE TTPs.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1 Forensic Architecture Summary:</strong><br>
+• <strong>Phase Pipeline:</strong> Media Collection ➔ Data Examination ➔ Information Analysis ➔ Evidence Reporting (NIST SP 800-86).<br>
+• <strong>Legal Evidence:</strong> Direct vs. Indirect (Circumstantial); Best Evidence (verified bit-stream image) vs. Corroborating Evidence.<br>
+• <strong>RFC 3227 Volatility:</strong> Registers/Caches ➔ RAM/Routing ➔ Temp Files ➔ Fixed Media ➔ Logs ➔ Network Topology ➔ Archives.<br>
+• <strong>Data Integrity:</strong> Always duplicate master volume using write-blockers; compute SHA-256 hashes; maintain signed logbooks for Chain of Custody.
+      </div>
+    </div>
+
+    <!-- Slide 5: [Original 3] -->
+    <div class="slide" id="slide-5" data-notes="Digital forensics is the recovery and investigation of information on digital devices related to criminal activity. Indicators of compromise (IoCs) are the evidence of an incident found on storage, volatile RAM, or pcaps and logs. We distinguish between private (internal) investigations and public investigations involving law enforcement. Also remember regulatory mandates like HIPAA: if patient data of 500+ individuals is breached, media and victims must be notified immediately!">
+<div class="slide-tag">28.1 Evidence Handling & Attack Attribution • 28.1.1</div>
+      <h2 class="slide-title">Digital Forensics: <span>Evidence & Legal Context</span></h2>
+      
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-icon">📁</div>
+          <h3>What is Digital Forensics?</h3>
+          <p style="margin-bottom: 0.6rem;">
+            <strong>Digital forensics</strong> is the recovery and investigation of information found on digital devices as it relates to criminal activity.
+          </p>
+          <ul>
+            <li><strong>Indicators of Compromise (IoC):</strong> Tangible evidence that an incident occurred (disk files, volatile RAM, pcaps, logs).</li>
+            <li><strong>Tier 1 Role:</strong> Tier 1 analysts are often the first to uncover wrongdoing and must handle evidence so it supports legal prosecution.</li>
+            <li><strong>Essential Mandate:</strong> All IoCs must be preserved in untampered condition for future analysis and threat attribution.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">⚖️</div>
+          <h3>Investigation Contexts & Regulations</h3>
+          <ul>
+            <li><strong>Private (Internal) Investigations:</strong> Focus on internal policy violations. If criminal conduct or intellectual property theft occurs, it becomes public by calling law enforcement.</li>
+            <li><strong>Public Investigations:</strong> Carried out by public officials when internal users or external attackers violate legal statutes.</li>
+            <li><strong>Regulatory Mandates (e.g., US HIPAA):</strong> Requires notification if patient records breach. If &gt;500 individuals in a jurisdiction are impacted, <em>both the media and affected victims</em> must be notified. Forensics certifies the numbers.</li>
+            <li><strong>Organization Under Investigation:</strong> The company itself may be investigated. Analysts must preserve evidence; intentional destruction results in criminal penalties.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Course Note: Private vs. Public & HIPAA Rule</span>
+      </div>
+      <div class="course-notes-body">
+        Under HIPAA regulations, if a data breach involves patient information, notification must be made. If the breach involves more than 500 individuals in a jurisdiction, the media and victims must be notified. Digital forensics certifies the scope and exact count.
+      </div>
+    </div>
+
+    <!-- Slide 3: 28.1.2 Digital Forensics Process Diagram (UNIZULU Palette) -->
+    </div>
+
+    <!-- Slide 4: Master Diagram f404cbb5-ce19-412b-9313-f04529e11869.jfif -->
+    </div>
+
+    <!-- Slide 6: [Original 4] -->
+    <div class="slide" id="slide-6" data-notes="This master infographic summarizes Section 28.1 across three core pillars: First, Digital Forensics sources (storage, RAM, network pcaps) and regulatory mandates like HIPAA. Second, the 4-phase forensic process (Collection, Examination, Analysis, Reporting), classifications of legal evidence, and the RFC 3227 Order of Volatility. Third, Data Integrity, Chain of Custody, master volume preservation with write-blockers and bit-level copies, and Attack Attribution via location, malware features, and TTPs.">
+<div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.1 Evidence Handling • Master Architectural Infographic</div>
+          <h2 class="slide-title">Digital Forensics: <span>Evidence Handling & Attribution</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('f404cbb5-ce19-412b-9313-f04529e11869.jfif', '28.1 Evidence Handling • Master Architectural Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="f404cbb5-ce19-412b-9313-f04529e11869.jfif" alt="28.1 Evidence Handling • Master Architectural Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Digital Forensics (28.1.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Recovers digital evidence; preserves Indicators of Compromise (IoCs); internal vs. public inquiries; certifies breach numbers for HIPAA compliance.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Process & Volatility (28.1.2 - 28.1.6)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">NIST SP 800-86 four phases (Collection, Examination, Analysis, Reporting); Best vs. Corroborating evidence; strict RFC 3227 volatility ladder.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Integrity & Attribution (28.1.7 - 28.1.9)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Unbroken chain of custody logbooks; hardware write-blockers; verified bit-level replicas; attributing attacks via IPs, code features, and MITRE TTPs.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1 Forensic Architecture Summary:</strong><br>
+• <strong>Phase Pipeline:</strong> Media Collection ➔ Data Examination ➔ Information Analysis ➔ Evidence Reporting (NIST SP 800-86).<br>
+• <strong>Legal Evidence:</strong> Direct vs. Indirect (Circumstantial); Best Evidence (verified bit-stream image) vs. Corroborating Evidence.<br>
+• <strong>RFC 3227 Volatility:</strong> Registers/Caches ➔ RAM/Routing ➔ Temp Files ➔ Fixed Media ➔ Logs ➔ Network Topology ➔ Archives.<br>
+• <strong>Data Integrity:</strong> Always duplicate master volume using write-blockers; compute SHA-256 hashes; maintain signed logbooks for Chain of Custody.
+      </div>
+    </div>
+
+    <!-- Slide 5: [Original 3] -->
+    </div>
+
+    <!-- Slide 7: [Original 5] -->
+    <div class="slide" id="slide-7" data-notes="NIST SP 800-86 Guide to Integrating Forensic Techniques into Incident Response defines the 4-phase digital evidence process: Collection, Examination, Analysis, and Reporting. Notice how data transforms: Collection acquires raw Media; Examination processes it into Data; Analysis extracts Information; and Reporting presents formal Evidence for stakeholders or courts.">
+<div class="slide-tag">28.1 Evidence Handling • 28.1.2 The Forensic Process</div>
+      <h2 class="slide-title">The NIST SP 800-86 <span>Forensic Process</span></h2>
+
+      <div class="diagram-box" style="margin-bottom: 1.25rem;">
+        <!-- Visualized SVG Diagram: 4-Phase Process in UNIZULU Palette -->
+        <svg class="diagram-svg" viewBox="0 0 950 160" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="#f59e0b"/>
+            </marker>
+          </defs>
+
+          <!-- Phase 1: Collection -->
+          <rect x="20" y="25" width="190" height="110" rx="10" fill="rgba(37, 99, 235, 0.16)" stroke="#2563eb" stroke-width="2"/>
+          <text x="115" y="55" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#60a5fa" text-anchor="middle">1. COLLECTION</text>
+          <rect x="75" y="65" width="80" height="20" rx="4" fill="rgba(37, 99, 235, 0.3)"/>
+          <text x="115" y="79" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#f8fafc" text-anchor="middle">MEDIA</text>
+          <text x="115" y="105" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Identify, acquire,</text>
+          <text x="115" y="120" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">and preserve sources</text>
+
+          <line x1="210" y1="80" x2="255" y2="80" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+          <!-- Phase 2: Examination -->
+          <rect x="260" y="25" width="190" height="110" rx="10" fill="rgba(245, 158, 11, 0.16)" stroke="#f59e0b" stroke-width="2"/>
+          <text x="355" y="55" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#fbbf24" text-anchor="middle">2. EXAMINATION</text>
+          <rect x="315" y="65" width="80" height="20" rx="4" fill="rgba(245, 158, 11, 0.3)"/>
+          <text x="355" y="79" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#f8fafc" text-anchor="middle">DATA</text>
+          <text x="355" y="105" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Extract artifacts,</text>
+          <text x="355" y="120" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">filter noise & unallocated</text>
+
+          <line x1="450" y1="80" x2="495" y2="80" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+          <!-- Phase 3: Analysis -->
+          <rect x="500" y="25" width="190" height="110" rx="10" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="2"/>
+          <text x="595" y="55" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#34d399" text-anchor="middle">3. ANALYSIS</text>
+          <rect x="535" y="65" width="120" height="20" rx="4" fill="rgba(16, 185, 129, 0.3)"/>
+          <text x="595" y="79" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#f8fafc" text-anchor="middle">INFORMATION</text>
+          <text x="595" y="105" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Reconstruct timeline,</text>
+          <text x="595" y="120" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">deduce root cause</text>
+
+          <line x1="690" y1="80" x2="735" y2="80" stroke="#f59e0b" stroke-width="2" marker-end="url(#arrowGold)"/>
+
+          <!-- Phase 4: Reporting -->
+          <rect x="740" y="25" width="190" height="110" rx="10" fill="rgba(56, 189, 248, 0.16)" stroke="#38bdf8" stroke-width="2"/>
+          <text x="835" y="55" font-family="'Inter', sans-serif" font-size="14" font-weight="700" fill="#7dd3fc" text-anchor="middle">4. REPORTING</text>
+          <rect x="785" y="65" width="100" height="20" rx="4" fill="rgba(56, 189, 248, 0.3)"/>
+          <text x="835" y="79" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="600" fill="#f8fafc" text-anchor="middle">EVIDENCE</text>
+          <text x="835" y="105" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">Document findings,</text>
+          <text x="835" y="120" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">legal & executive briefs</text>
+        </svg>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Collection is Critical</h3>
+          <p>Identification of potential sources of forensic data and acquisition, handling, and storage of that data. Special care must be taken <strong>not to damage, lose, or omit important data</strong>.</p>
+        </div>
+        <div class="card">
+          <h3>NIST SP 800-86 Guidance</h3>
+          <p>Organizations must develop well-documented procedures. In the event of a public investigation, regulatory bodies and courts may inspect these records to certify data handling integrity.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 4: 28.1.4 Types of Evidence -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1.2 NIST SP 800-86 Forensic Process:</strong><br>
+1. <strong>Collection (Media):</strong> Identify, acquire, label, and securely store media without altering original contents.<br>
+2. <strong>Examination (Data):</strong> Extract relevant digital artifacts and filter routine/benign operating system noise.<br>
+3. <strong>Analysis (Information):</strong> Correlate artifacts to reconstruct the intrusion timeline and draw actionable conclusions.<br>
+4. <strong>Reporting (Evidence):</strong> Document procedures, findings, and forensic conclusions for stakeholders and court presentation.
+      </div>
+    </div>
+
+    <!-- Slide 6: [Original 4] -->
+    </div>
+
+    <!-- Slide 8: [Original 6] -->
+    <div class="slide" id="slide-8" data-notes="Evidence classification is a major test topic. Direct evidence proves a fact directly without inference (eyewitness testimony or indisputable possession). Indirect evidence, or circumstantial evidence, establishes a hypothesis in combination with other facts (e.g. prior criminal acts). Furthermore, Best Evidence is evidence in its pristine original state, while Corroborating Evidence supports assertions made from best evidence.">
+<div class="slide-tag">28.1 Evidence Handling • 28.1.4 Types of Evidence</div>
+      <h2 class="slide-title">Classifications of <span>Legal Evidence</span></h2>
+
+      <div class="grid-2" style="margin-bottom: 1rem;">
+        <div class="card" style="border-left: 4px solid var(--unizulu-royal);">
+          <div class="card-icon" style="color: var(--unizulu-sky);">👁️</div>
+          <h3>Direct Evidence</h3>
+          <p>Evidence that was indisputably in the possession of the accused, or is eyewitness evidence from someone who directly observed criminal behavior.</p>
+          <ul>
+            <li>Requires no presumption or inference.</li>
+            <li>Example: CCTV footage showing an unauthorized person typing on the console.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--unizulu-gold);">
+          <div class="card-icon" style="color: var(--unizulu-gold);">🧩</div>
+          <h3>Indirect (Circumstantial) Evidence</h3>
+          <p>Evidence that, in combination with other facts, establishes a hypothesis.</p>
+          <ul>
+            <li>Example: Evidence that an individual has committed similar crimes supports the assertion they committed this crime.</li>
+            <li>In cybercrime, most TTP correlations are circumstantial.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card" style="border-left: 4px solid var(--accent-emerald);">
+          <div class="card-icon" style="color: var(--accent-emerald);">💎</div>
+          <h3>Best Evidence</h3>
+          <p>Evidence that is in its <strong>original state</strong>. This could be storage devices used by an accused, or verified archives of files that can be proven to be unaltered (e.g., bit-stream disk images).</p>
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--accent-purple);">
+          <div class="card-icon" style="color: var(--accent-purple);">🔗</div>
+          <h3>Corroborating Evidence</h3>
+          <p>Evidence that supports an assertion that is developed from best evidence (e.g., corroborating firewall connection logs that match an executable found on the suspect's hard drive).</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 5: 28.1.6 Evidence Collection Order (RFC 3227) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1.4 Legal Evidence Classifications:</strong><br>
+• <strong>Direct Evidence:</strong> Indisputably in possession of accused or direct eyewitness testimony.<br>
+• <strong>Indirect (Circumstantial) Evidence:</strong> Combined facts establishing a logical hypothesis (e.g., prior crimes, matching TTPs).<br>
+• <strong>Best Evidence:</strong> Unaltered original state (e.g., bit-stream forensic disk clone verified by SHA-256 hash).<br>
+• <strong>Corroborating Evidence:</strong> Supplementary evidence supporting best evidence (e.g., secondary server logs confirming endpoint alerts).
+      </div>
+    </div>
+
+    <!-- Slide 7: [Original 5] -->
+    </div>
+
+    <!-- Slide 9: [Original 7] -->
+    <div class="slide" id="slide-9" data-notes="IETF RFC 3227 provides the official guidelines for the order of digital evidence collection based on volatility. Data stored in RAM is the most volatile and is destroyed the instant power is lost or overwritten by normal OS processes. We MUST collect evidence from most volatile to least volatile. Also, record the hardware/software configs and list who had access!">
+<div class="slide-tag">28.1 Evidence Handling • 28.1.6 RFC 3227 Volatility</div>
+      <h2 class="slide-title">RFC 3227: <span>Order of Volatility</span></h2>
+
+      <div class="grid-2">
+        <div class="volatility-stack">
+          <div class="volatility-row vr-1">
+            <span>1. Memory registers, caches</span>
+            <span class="volatility-badge">Most Volatile</span>
+          </div>
+          <div class="volatility-row vr-2">
+            <span>2. Routing table, ARP cache, process table, kernel stats, RAM</span>
+            <span class="volatility-badge">Volatile Memory</span>
+          </div>
+          <div class="volatility-row vr-3">
+            <span>3. Temporary file systems</span>
+            <span class="volatility-badge">Transient FS</span>
+          </div>
+          <div class="volatility-row vr-4">
+            <span>4. Non-volatile media, fixed & removable (Disks, USBs)</span>
+            <span class="volatility-badge">Local Storage</span>
+          </div>
+          <div class="volatility-row vr-5">
+            <span>5. Remote logging and monitoring data (Syslog, SIEM)</span>
+            <span class="volatility-badge">Remote Telemetry</span>
+          </div>
+          <div class="volatility-row vr-6">
+            <span>6. Physical interconnections and topologies</span>
+            <span class="volatility-badge">Physical / Net</span>
+          </div>
+          <div class="volatility-row vr-7">
+            <span>7. Archival media, tape or other backups</span>
+            <span class="volatility-badge">Least Volatile</span>
+          </div>
+        </div>
+
+        <div class="card" style="justify-content: center;">
+          <div class="card-icon" style="color: var(--accent-rose);">⚠️</div>
+          <h3 style="color: #fda4af;">Why Volatility Matters</h3>
+          <p style="margin-bottom: 0.6rem;">
+            Data stored in RAM is lost the instant power is cut. Furthermore, routine OS tasks will overwrite unallocated RAM. Therefore, digital evidence collection <strong>must begin with the most volatile</strong> and proceed to the least volatile.
+          </p>
+          <div style="background: rgba(0,0,0,0.4); padding: 0.8rem; border-radius: 8px; border-left: 3px solid var(--unizulu-gold); font-size: 0.82rem; color: #cbd5e1;">
+            <strong>System Documentation Mandate:</strong> Details of the systems from which evidence was collected—including who has access, permission levels, hardware, and software configurations—<strong>must be recorded</strong>.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 6: 28.1.7 & 28.1.8 Chain of Custody & Preservation -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1.6 RFC 3227 Order of Volatility:</strong><br>
+Collect digital evidence in strict sequence from most volatile to least volatile:<br>
+1. Memory registers, caches<br>
+2. Routing tables, ARP cache, process table, kernel stats, RAM<br>
+3. Temporary file systems (/tmp, swap)<br>
+4. Non-volatile media (Hard disks, SSDs, USBs)<br>
+5. Remote logging and monitoring data (Syslog, SIEM, NetFlow)<br>
+6. Physical network topology and cabling<br>
+7. Archival media and backup tapes.
+      </div>
+    </div>
+
+    <!-- Slide 8: [Original 6] -->
+    </div>
+
+    <!-- Slide 10: [Original 8] -->
+    <div class="slide" id="slide-10" data-notes="In 28.1.7 and 28.1.8, we study Chain of Custody and Data Integrity. Opposing counsel will always argue evidence was altered. A rigorous chain of custody proves who found it, who held it, where it was kept, and who had access. In data preservation: always preserve timestamps, NEVER open files from original media, make bit-level raw copies, and NEVER turn off or unplug an infected computer unless instructed!">
+<div class="slide-tag">28.1 Evidence Handling • 28.1.7 & 28.1.8 Integrity</div>
+      <h2 class="slide-title">Chain of Custody & <span>Data Preservation</span></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h3>Chain of Custody Checklist</h3>
+          <p style="margin-bottom: 0.5rem;">Defines collection, handling, and secure storage to prove evidence was never altered or fabricated:</p>
+          <ul>
+            <li><strong>Who</strong> discovered and collected the evidence?</li>
+            <li><strong>All details</strong> of handling: times, dates, places, and personnel involved.</li>
+            <li><strong>Primary responsibility:</strong> who was assigned custody and when custody transferred.</li>
+            <li><strong>Physical access logs:</strong> restricted strictly to essential personnel while stored.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🛡️</div>
+          <h3>Data Integrity & Preservation Rules</h3>
+          <ul>
+            <li><strong>Preserve Timestamps:</strong> Avoid opening files on original media, as doing so alters access timestamps.</li>
+            <li><strong>Direct Bit-Level Copies:</strong> Clone exact bit-level disk images; compare hashes of archived vs. investigated disks to prove no tampering.</li>
+            <li><strong>Work on Copies Only:</strong> Analysis is conducted solely on duplicates, preserving the original disk in an untampered condition.</li>
+            <li><strong>Do Not Unplug:</strong> Users should <em>not</em> disconnect, unplug, or power off infected machines unless explicitly directed by security staff.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Course Note: Bit-level verification & Volatile RAM tools</span>
+      </div>
+      <div class="course-notes-body">
+        Special tools preserve volatile RAM evidence before power-off. It should be possible to compare the archived disk image and investigated image to identify tampering. The original media must be archived and protected.
+      </div>
+    </div>
+
+    <!-- Slide 7: 28.1.9 & 28.1.10 Attack Attribution & MITRE ATT&CK -->
+    </div>
+
+    <!-- Slide 9: [Original 7] -->
+    </div>
+
+    <!-- Slide 11: Master Diagram 01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif -->
+    <div class="slide" id="slide-11" data-notes="This tactical architecture diagram details the Lockheed Martin Cyber Kill Chain and corresponding SOC defenses. On the left is the adversary campaign: Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command and Control, and Actions on Objectives. In the center is the critical Defensive Breakpoint: stopping an exploit or persistence breaks the entire attack chain. On the right are active SOC defensive controls: log monitoring, signature updates, email filtering, endpoint hardening, and DNS sinkholing.">
+      <div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.2 Cyber Kill Chain • Master Tactical Diagram</div>
+          <h2 class="slide-title">Lockheed Martin Kill Chain: <span>Adversary vs. SOC Defenses</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif', '28.2 Cyber Kill Chain • Master Tactical Diagram')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif" alt="28.2 Cyber Kill Chain • Master Tactical Diagram" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Sequential Attack Stages</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Adversary traverses 7 linear phases. Breaking any single link halts the campaign and prevents adversary objective completion.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Defensive Breakpoint</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">The window between Delivery, Exploit Execution, and Persistence represents the SOC's highest leverage point to neutralize threats.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Defense-in-Depth Layering</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Aligns network sensors, endpoint HIPS, DNS sinkholing, email sandboxing, and rapid containment playbooks to each stage.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.2 Kill Chain Architecture Summary:</strong><br>
+• <strong>1. Reconnaissance:</strong> Social media, port scanning target ➔ SOC audits web/firewall logs.<br>
+• <strong>2. Weaponization:</strong> Pairing backdoor with exploit ➔ SOC updates IDS/IPS signatures & threat intel.<br>
+• <strong>3. Delivery:</strong> Spearphishing or infected USB ➔ SOC email filtering & proxy logging.<br>
+• <strong>4. Exploitation:</strong> Triggering vulnerability ➔ Defensive Breakpoint: security awareness & patching.<br>
+• <strong>5. Installation:</strong> Establishing persistence/Run keys ➔ HIPS & file integrity monitoring.<br>
+• <strong>6. Command & Control:</strong> HTTPS/DNS beaconing ➔ Outbound anomaly detection & DNS sinkholing.<br>
+• <strong>7. Actions on Objectives:</strong> Exfiltration, wiping, ransom ➔ Rapid triage & containment playbooks.
+      </div>
+    </div>
+
+    <!-- Slide 12: [Original 9] -->
+    <div class="slide" id="slide-12" data-notes="Threat attribution determines the individual, organization, or nation responsible for an intrusion. We correlate Tactics, Techniques, and Procedures (TTPs) with threat intelligence. Beware of bias—speculating about motivations can blind investigators. Internal threats rely on asset management, IP, MAC, DHCP, and AAA logs. The MITRE ATT&CK framework models real-world adversary behavior into a matrix of Tactics, Techniques, and Procedures.">
+<div class="slide-tag">28.1 Attack Attribution • 28.1.9 & 28.1.10 MITRE ATT&CK</div>
+      <h2 class="slide-title">Attack Attribution & <span>MITRE ATT&CK</span></h2>
+
+      <div class="grid-2" style="margin-bottom: 1rem;">
+        <div class="card">
+          <div class="card-icon">🎯</div>
+          <h3>Threat Attribution Disciplines</h3>
+          <p style="margin-bottom: 0.5rem;"><strong>Threat attribution</strong> is the act of determining the individual, organization, or nation responsible for an attack.</p>
+          <ul>
+            <li><strong>Systematic Investigation:</strong> Do not allow speculation on motive to bias findings (e.g., assuming a competitor did it can blind you to nation-states).</li>
+            <li><strong>TTP Correlation:</strong> Correlate Tactics, Techniques, and Procedures with threat intel (circumstantial evidence).</li>
+            <li><strong>Internal Threats:</strong> Use IP addresses, MAC addresses, DHCP logs, and <strong>AAA logs</strong> (who accessed what, when).</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📊</div>
+          <h3>MITRE ATT&CK Framework</h3>
+          <p style="margin-bottom: 0.5rem;">Global knowledge base of adversary behavior based on real-world exploits:</p>
+          <ul>
+            <li><strong>Tactics (Columns):</strong> Technical goals the attacker must accomplish (e.g., Initial Access, Persistence).</li>
+            <li><strong>Techniques (Rows):</strong> Means by which tactics are accomplished.</li>
+            <li><strong>Procedures:</strong> Documented real-world actions and malware implementations.</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Mini MITRE SVG Diagram in UNIZULU Palette -->
+      <div class="diagram-box">
+        <svg class="diagram-svg" viewBox="0 0 900 110" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="10" width="280" height="90" rx="8" fill="rgba(245, 158, 11, 0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+          <text x="150" y="38" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#fbbf24" text-anchor="middle">TACTICS</text>
+          <text x="150" y="62" font-family="'Inter', sans-serif" font-size="12" fill="#f8fafc" text-anchor="middle">The Attacker's Technical Goals</text>
+          <text x="150" y="82" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">(Matrix Columns: Recon, Access, C2)</text>
+
+          <text x="315" y="58" font-family="'Inter', sans-serif" font-size="20" fill="#f59e0b">➔</text>
+
+          <rect x="340" y="10" width="280" height="90" rx="8" fill="rgba(37, 99, 235, 0.15)" stroke="#2563eb" stroke-width="1.5"/>
+          <text x="480" y="38" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#60a5fa" text-anchor="middle">TECHNIQUES</text>
+          <text x="480" y="62" font-family="'Inter', sans-serif" font-size="12" fill="#f8fafc" text-anchor="middle">The Means Accomplishing Tactics</text>
+          <text x="480" y="82" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">(Sub-items: Spear-phishing, DLL Injection)</text>
+
+          <text x="645" y="58" font-family="'Inter', sans-serif" font-size="20" fill="#38bdf8">➔</text>
+
+          <rect x="670" y="10" width="220" height="90" rx="8" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" stroke-width="1.5"/>
+          <text x="780" y="38" font-family="'JetBrains Mono', monospace" font-size="14" font-weight="700" fill="#34d399" text-anchor="middle">PROCEDURES</text>
+          <text x="780" y="62" font-family="'Inter', sans-serif" font-size="12" fill="#f8fafc" text-anchor="middle">Real-world Execution</text>
+          <text x="780" y="82" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">(Specific malware commands/code)</text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Slide 8: 28.2 Cyber Kill Chain (Stages 1 to 3) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.1.9 & 28.1.10 Attack Attribution & MITRE ATT&CK:</strong><br>
+• <strong>Attribution:</strong> Identifying the threat actor responsible through IP/MAC geolocation, malware code features, and behavioral TTPs.<br>
+• <strong>MITRE ATT&CK Framework:</strong><br>
+  - <strong>Tactics:</strong> Adversary's tactical goal ('Why', e.g., Initial Access, Persistence, Exfiltration).<br>
+  - <strong>Techniques:</strong> Specific means to achieve the goal ('How', e.g., Spearphishing, DLL Injection).<br>
+  - <strong>Procedures:</strong> Exact implementation code or execution sequence used by a specific threat group.
+      </div>
+    </div>
+
+    <!-- Slide 10: [Original 8] -->
+    </div>
+
+    <!-- Slide 13: [Original 10] -->
+    <div class="slide" id="slide-13" data-notes="Topic 28.2 covers the Cyber Kill Chain, developed by Lockheed Martin. It breaks an attack into 7 sequential stages. The core defensive premise is: if defenders break the chain at ANY point, the attack fails completely, preventing damage and limiting what the adversary learns. Here we examine Reconnaissance, Weaponization, and Delivery with their specific Adversary actions and SOC Defenses.">
+<div class="slide-tag">28.2 The Cyber Kill Chain • Stages 1 - 3</div>
+      <h2 class="slide-title">The Cyber Kill Chain: <span>Stages 1 to 3</span></h2>
+
+      <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 8px; padding: 0.6rem 1rem; margin-bottom: 1rem; font-size: 0.85rem; color: #cbd5e1;">
+        <strong>Lockheed Martin Principle:</strong> If the chain is broken at any point, the attack fails, preventing damage and limiting what the adversary learns about the environment.
+      </div>
+
+      <div class="kc-steps">
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">1. Reconnaissance</span>
+            <span class="kc-step-num">STAGE 01</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Researching the target, harvesting emails, social media, public relations, network scans, and open ports.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Analyzing web logs/browser analytics, monitoring scanning activity, prioritizing high-value defensive controls.</div>
+          </div>
+        </div>
+
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">2. Weaponization</span>
+            <span class="kc-step-num">STAGE 02</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Pairing an exploit targeting identified vulnerabilities with a payload/backdoor (automated weaponizers/zero-days).</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Keeping IDS/IPS signatures current, analyzing malware artifacts, profiling custom vs off-the-shelf weaponizer behaviors.</div>
+          </div>
+        </div>
+
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">3. Delivery</span>
+            <span class="kc-step-num">STAGE 03</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Transmitting payload via email attachments, phishing links, compromised websites, or infected USB drives.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Inspecting delivery vectors/paths, filtering malicious email attachments, logging web/mail traffic for reconstruction.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 9: 28.2 Cyber Kill Chain (Stages 4 to 7) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.2 Lockheed Martin Cyber Kill Chain (Stages 1-3):</strong><br>
+Developed to identify and prevent cyber intrusions. Breaking any single link stops the entire attack.<br>
+• <strong>1. Reconnaissance:</strong> Harvest intelligence, scan ports, harvest emails, search social media. (Defense: Web/firewall log audits).<br>
+• <strong>2. Weaponization:</strong> Pair custom backdoor with an exploit into a deliverable payload. (Defense: Threat intel, analyzing malware artifacts).<br>
+• <strong>3. Delivery:</strong> Transmit payload via spearphishing attachment, malicious link, or USB. (Defense: Email filtering, endpoint USB controls).
+      </div>
+    </div>
+
+    <!-- Slide 11: Master Diagram 01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif -->
+    </div>
+
+    <!-- Slide 14: Master Diagram c535d161-11cb-455b-8625-1b1a1d999ff3.jfif -->
+    <div class="slide" id="slide-14" data-notes="This master architecture diagram illustrates the Diamond Model of Intrusion Analysis and its relationship to the Cyber Kill Chain. Part 1 shows the 4 core features: Adversary, Capability, Infrastructure, and Victim, along with meta-features (Timestamp, Phase, Result, Direction, Methodology, Resources). Part 2 shows Analytical Pivoting: moving from Victim to Capability to Infrastructure to Adversary. Part 3 illustrates vertical Kill Chain traversal against Gadgets Inc. with horizontal pivoting to compromise Victim 2.">
+      <div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.3 Diamond Model • Master Analytical Infographic</div>
+          <h2 class="slide-title">The Diamond Model & <span>Attack Pivoting Architecture</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('c535d161-11cb-455b-8625-1b1a1d999ff3.jfif', '28.3 Diamond Model • Master Analytical Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="c535d161-11cb-455b-8625-1b1a1d999ff3.jfif" alt="28.3 Diamond Model • Master Analytical Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Core & Meta-Features (28.3.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Four vertex nodes: Adversary, Capability, Infrastructure, Victim. Enriched by 6 meta-features: Timestamp, Phase, Result, Direction, Methodology, Resources.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Analytical Pivoting (28.3.2)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Pivoting leverages discovered artifacts in one node (e.g., malware hash or C2 IP) to uncover connected victims or identify the adversary.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Kill Chain Threading (28.3.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Combines vertical Kill Chain execution with horizontal pivoting across organizations (Gadgets Inc. NA1 to Victim 2 CRO).</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.3 Diamond Model Architecture Summary:</strong><br>
+• <strong>Core Features:</strong> Adversary (threat group) uses Infrastructure (C2, proxies) to deliver Capability (malware, exploits) targeting Victim (host, network).<br>
+• <strong>6 Meta-Features:</strong> Timestamp, Phase (Kill Chain stage), Result (success/failure), Direction (Adversary-to-Victim, Bidirectional), Methodology, Resources.<br>
+• <strong>Pivoting Pathway:</strong> Victim host discovers malware (Capability) ➔ extracts C2 IP (Infrastructure) ➔ discovers additional victims or adversary servers.<br>
+• <strong>Horizontal Pivoting (Gadgets Inc. case):</strong> Adversary compromises NA1, mines address books, and spearphishes Victim 2 (CRO of Interesting Research Inc.) using NA1 as web proxy.
+      </div>
+    </div>
+
+    <!-- Slide 15: [Original 11] -->
+    <div class="slide" id="slide-15" data-notes="This tactical architecture diagram details the Lockheed Martin Cyber Kill Chain and corresponding SOC defenses. On the left is the adversary campaign: Reconnaissance, Weaponization, Delivery, Exploitation, Installation, Command and Control, and Actions on Objectives. In the center is the critical Defensive Breakpoint: stopping an exploit or persistence breaks the entire attack chain. On the right are active SOC defensive controls: log monitoring, signature updates, email filtering, endpoint hardening, and DNS sinkholing.">
+<div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.2 Cyber Kill Chain • Master Tactical Diagram</div>
+          <h2 class="slide-title">Lockheed Martin Kill Chain: <span>Adversary vs. SOC Defenses</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif', '28.2 Cyber Kill Chain • Master Tactical Diagram')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="01daa9c8-a4d3-43bc-832f-f1098f6cd5df.jfif" alt="28.2 Cyber Kill Chain • Master Tactical Diagram" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Sequential Attack Stages</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Adversary traverses 7 linear phases. Breaking any single link halts the campaign and prevents adversary objective completion.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Defensive Breakpoint</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">The window between Delivery, Exploit Execution, and Persistence represents the SOC's highest leverage point to neutralize threats.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Defense-in-Depth Layering</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Aligns network sensors, endpoint HIPS, DNS sinkholing, email sandboxing, and rapid containment playbooks to each stage.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.2 Kill Chain Architecture Summary:</strong><br>
+• <strong>1. Reconnaissance:</strong> Social media, port scanning target ➔ SOC audits web/firewall logs.<br>
+• <strong>2. Weaponization:</strong> Pairing backdoor with exploit ➔ SOC updates IDS/IPS signatures & threat intel.<br>
+• <strong>3. Delivery:</strong> Spearphishing or infected USB ➔ SOC email filtering & proxy logging.<br>
+• <strong>4. Exploitation:</strong> Triggering vulnerability ➔ Defensive Breakpoint: security awareness & patching.<br>
+• <strong>5. Installation:</strong> Establishing persistence/Run keys ➔ HIPS & file integrity monitoring.<br>
+• <strong>6. Command & Control:</strong> HTTPS/DNS beaconing ➔ Outbound anomaly detection & DNS sinkholing.<br>
+• <strong>7. Actions on Objectives:</strong> Exfiltration, wiping, ransom ➔ Rapid triage & containment playbooks.
+      </div>
+    </div>
+
+    <!-- Slide 12: [Original 9] -->
+    </div>
+
+    <!-- Slide 16: [Original 12] -->
+    <div class="slide" id="slide-16" data-notes="Stages 4 through 7: Exploitation triggers the code against OS/software or human vulnerabilities. Installation establishes persistence (run keys, web shells, services) so access survives reboots. Command and Control (C2/CnC) opens bi-directional communications (HTTP/HTTPS, DNS, IRC)—this is the FINAL window to block the adversary before they achieve their mission! Finally, Actions on Objectives executes the core mission: exfiltration, ransom, or lateral movement.">
+<div class="slide-tag">28.2 The Cyber Kill Chain • Stages 4 - 7</div>
+      <h2 class="slide-title">The Cyber Kill Chain: <span>Stages 4 to 7</span></h2>
+
+      <div class="kc-steps">
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">4. Exploitation</span>
+            <span class="kc-step-num">STAGE 04</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Triggering malicious code to exploit software, OS, or human vulnerabilities to gain execution rights.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Security awareness training, regular penetration testing, endpoint hardening, vulnerability patching, secure coding.</div>
+          </div>
+        </div>
+
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">5. Installation</span>
+            <span class="kc-step-num">STAGE 05</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Establishing persistence (unauthorized services, registry Run keys, web shells) surviving reboots.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Deploying HIPS, monitoring abnormal file creations, unauthorized privilege escalation, auditing endpoint activity.</div>
+          </div>
+        </div>
+
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">6. Command & Control (CnC / C2)</span>
+            <span class="kc-step-num" style="color: var(--unizulu-gold);">STAGE 06 • CRITICAL WINDOW</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Opening bi-directional channel over HTTP/HTTPS, DNS, IRC back to attacker infrastructure.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Detecting beaconing, sinkholing/blocking malicious Dynamic DNS, inspecting proxy/DNS logs. <em>Final window to block before damage!</em></div>
+          </div>
+        </div>
+
+        <div class="kc-step">
+          <div class="kc-step-header">
+            <span class="kc-step-title">7. Actions on Objectives</span>
+            <span class="kc-step-num" style="color: var(--accent-rose);">STAGE 07 • IMPACT</span>
+          </div>
+          <div class="kc-details">
+            <div class="kc-adversary"><strong>Adversary:</strong> Credential theft, lateral movement, data exfiltration, ransom extortion, data wiping, cryptomining.</div>
+            <div class="kc-defense"><strong>SOC Defense:</strong> Rapid incident triage, packet capture analysis, lateral movement detection, containment playbooks, damage assessment.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 10: 28.3.1 The Diamond Model Overview (UNIZULU Palette) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.2 Lockheed Martin Cyber Kill Chain (Stages 4-7):</strong><br>
+• <strong>4. Exploitation:</strong> Trigger malicious code against vulnerability to gain code execution. (Defense: Patching, DEP, endpoint hardening).<br>
+• <strong>5. Installation:</strong> Establish persistent backdoor service, registry Run keys. (Defense: HIPS, file integrity monitoring).<br>
+• <strong>6. Command & Control (C2):</strong> Open hands-on-keyboard beacon channel over HTTPS/DNS to adversary server. (Defense: DNS sinkholing, proxy inspection).<br>
+• <strong>7. Actions on Objectives:</strong> Fulfill goal—data exfiltration, ransomware extortion, destructive wiping. (Defense: Rapid incident triage, packet capture analysis).
+      </div>
+    </div>
+
+    <!-- Slide 13: [Original 10] -->
+    </div>
+
+    <!-- Slide 17: [Original 13] -->
+    <div class="slide" id="slide-17" data-notes="Topic 28.3 introduces the Diamond Model of Intrusion Analysis. In this model, an event is a time-bound step where an adversary uses capability over infrastructure to attack a victim for a specific result. Notice the 4 vertices: Adversary, Capability, Infrastructure, Victim. It also includes 6 meta-features: Timestamp, Phase, Result, Direction, Methodology, and Resources.">
+<div class="slide-tag">28.3 Diamond Model of Intrusion Analysis • 28.3.1 Overview</div>
+      <h2 class="slide-title">The Diamond Model: <span>Core & Meta-Features</span></h2>
+
+      <div class="grid-2">
+        <!-- SVG Diamond Model Diagram in UNIZULU Palette -->
+        <div class="diagram-box">
+          <svg class="diagram-svg" viewBox="0 0 450 320" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <filter id="glowGold" x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="glow"/>
+                <feComposite in="SourceGraphic" in2="glow" operator="over"/>
+              </filter>
+            </defs>
+            <!-- Outer Diamond Lines in UNIZULU Gold -->
+            <polygon points="225,30 390,160 225,290 60,160" fill="rgba(245, 158, 11, 0.05)" stroke="#f59e0b" stroke-width="2" stroke-dasharray="4 4"/>
+            <!-- Internal Cross Lines -->
+            <line x1="225" y1="30" x2="225" y2="290" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+            <line x1="60" y1="160" x2="390" y2="160" stroke="rgba(255,255,255,0.15)" stroke-width="1.5"/>
+
+            <!-- Top Node: Adversary -->
+            <circle cx="225" cy="30" r="24" fill="#0a172e" stroke="#f43f5e" stroke-width="3" filter="url(#glowGold)"/>
+            <text x="225" y="34" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#fda4af" text-anchor="middle">ADV</text>
+            <text x="225" y="-3" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#f43f5e" text-anchor="middle">ADVERSARY</text>
+
+            <!-- Left Node: Capability -->
+            <circle cx="60" cy="160" r="24" fill="#0a172e" stroke="#f59e0b" stroke-width="3" filter="url(#glowGold)"/>
+            <text x="60" y="164" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#fde68a" text-anchor="middle">CAP</text>
+            <text x="60" y="198" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#f59e0b" text-anchor="middle">CAPABILITY</text>
+
+            <!-- Right Node: Infrastructure -->
+            <circle cx="390" cy="160" r="24" fill="#0a172e" stroke="#38bdf8" stroke-width="3" filter="url(#glowGold)"/>
+            <text x="390" y="164" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#7dd3fc" text-anchor="middle">INFRA</text>
+            <text x="390" y="198" font-family="'JetBrains Mono', monospace" font-size="11" font-weight="700" fill="#38bdf8" text-anchor="middle">INFRASTRUCTURE</text>
+
+            <!-- Bottom Node: Victim -->
+            <circle cx="225" cy="290" r="24" fill="#0a172e" stroke="#10b981" stroke-width="3" filter="url(#glowGold)"/>
+            <text x="225" y="294" font-family="'Inter', sans-serif" font-size="10" font-weight="700" fill="#86efac" text-anchor="middle">VIC</text>
+            <text x="225" y="326" font-family="'JetBrains Mono', monospace" font-size="12" font-weight="700" fill="#10b981" text-anchor="middle">VICTIM</text>
+
+            <!-- Center Summary Text -->
+            <text x="225" y="145" font-family="'Inter', sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">Adversary uses Capability</text>
+            <text x="225" y="160" font-family="'Inter', sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">over Infrastructure</text>
+            <text x="225" y="175" font-family="'Inter', sans-serif" font-size="10" fill="#94a3b8" text-anchor="middle">to attack Victim</text>
+          </svg>
+        </div>
+
+        <!-- Explanations & 6 Meta-Features -->
+        <div class="card">
+          <h3>The 6 Meta-Features</h3>
+          <p style="margin-bottom: 0.4rem; font-size: 0.82rem;">Meta-features expand the model to provide crucial analytical context:</p>
+          <ul style="font-size: 0.82rem;">
+            <li><strong>Timestamp:</strong> Start/stop time; integral for grouping malicious activity.</li>
+            <li><strong>Phase:</strong> Steps analogous to the Cyber Kill Chain executed in succession.</li>
+            <li><strong>Result:</strong> What the adversary gained (Confidentiality, Integrity, Availability compromised).</li>
+            <li><strong>Direction:</strong> Adversary-to-Infra, Infra-to-Victim, Victim-to-Infra, Infra-to-Adversary.</li>
+            <li><strong>Methodology:</strong> Event class (e.g., port scan, phishing, content delivery attack, SYN flood).</li>
+            <li><strong>Resources:</strong> Tools, adversary knowledge, funds, facilities, stolen credentials.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 11: 28.3.2 Pivoting Across the Diamond Model -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.3.1 The Diamond Model of Intrusion Analysis:</strong><br>
+Framework for analyzing intrusion events across 4 Core Features:<br>
+1. <strong>Adversary:</strong> Threat actor responsible for the attack.<br>
+2. <strong>Capability:</strong> Tools, malware, or exploits used.<br>
+3. <strong>Infrastructure:</strong> Physical or logical communications networks (IPs, domains, C2 servers).<br>
+4. <strong>Victim:</strong> Target organization, person, system, or email address.<br>
+<strong>6 Meta-Features:</strong> Timestamp, Phase, Result, Direction, Methodology, Resources.
+      </div>
+    </div>
+
+    <!-- Slide 15: Master Diagram c535d161-11cb-455b-8625-1b1a1d999ff3.jfif -->
+    </div>
+
+    <!-- Slide 18: [Original 15] -->
+    <div class="slide" id="slide-18" data-notes="This master architecture diagram illustrates the Diamond Model of Intrusion Analysis and its relationship to the Cyber Kill Chain. Part 1 shows the 4 core features: Adversary, Capability, Infrastructure, and Victim, along with meta-features (Timestamp, Phase, Result, Direction, Methodology, Resources). Part 2 shows Analytical Pivoting: moving from Victim to Capability to Infrastructure to Adversary. Part 3 illustrates vertical Kill Chain traversal against Gadgets Inc. with horizontal pivoting to compromise Victim 2.">
+<div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.3 Diamond Model • Master Analytical Infographic</div>
+          <h2 class="slide-title">The Diamond Model & <span>Attack Pivoting Architecture</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('c535d161-11cb-455b-8625-1b1a1d999ff3.jfif', '28.3 Diamond Model • Master Analytical Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="c535d161-11cb-455b-8625-1b1a1d999ff3.jfif" alt="28.3 Diamond Model • Master Analytical Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">1. Core & Meta-Features (28.3.1)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Four vertex nodes: Adversary, Capability, Infrastructure, Victim. Enriched by 6 meta-features: Timestamp, Phase, Result, Direction, Methodology, Resources.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">2. Analytical Pivoting (28.3.2)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Pivoting leverages discovered artifacts in one node (e.g., malware hash or C2 IP) to uncover connected victims or identify the adversary.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">3. Kill Chain Threading (28.3.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Combines vertical Kill Chain execution with horizontal pivoting across organizations (Gadgets Inc. NA1 to Victim 2 CRO).</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.3 Diamond Model Architecture Summary:</strong><br>
+• <strong>Core Features:</strong> Adversary (threat group) uses Infrastructure (C2, proxies) to deliver Capability (malware, exploits) targeting Victim (host, network).<br>
+• <strong>6 Meta-Features:</strong> Timestamp, Phase (Kill Chain stage), Result (success/failure), Direction (Adversary-to-Victim, Bidirectional), Methodology, Resources.<br>
+• <strong>Pivoting Pathway:</strong> Victim host discovers malware (Capability) ➔ extracts C2 IP (Infrastructure) ➔ discovers additional victims or adversary servers.<br>
+• <strong>Horizontal Pivoting (Gadgets Inc. case):</strong> Adversary compromises NA1, mines address books, and spearphishes Victim 2 (CRO of Interesting Research Inc.) using NA1 as web proxy.
+      </div>
+    </div>
+
+    <!-- Slide 15: [Original 11] -->
+    </div>
+
+    <!-- Slide 19: [Original 15] -->
+    <div class="slide" id="slide-19" data-notes="Pivoting is the primary analytical technique in the Diamond Model. When an analyst finds malware on a victim machine, they pivot to find C2 domains. Those domains resolve to IP addresses, which are then used in firewall logs to uncover other infected victims, and IP whois/registrar details uncover the adversary. Here is the 5-step pivoting flow.">
+<div class="slide-tag">28.3 Diamond Model • 28.3.2 Pivoting</div>
+      <h2 class="slide-title">Pivoting Across the <span>Diamond Model</span></h2>
+
+      <div class="grid-2">
+        <div class="card" style="justify-content: space-between;">
+          <div>
+            <div class="card-icon">🔄</div>
+            <h3>What is Pivoting?</h3>
+            <p style="margin-bottom: 0.75rem;">
+              The Diamond Model is ideal for illustrating how an analyst or adversary pivots from one artifact or event to the next.
+            </p>
+            <div style="background: rgba(0,0,0,0.4); padding: 0.8rem; border-radius: 8px; border-left: 3px solid var(--unizulu-gold); font-size: 0.82rem; color: #cbd5e1; margin-bottom: 0.75rem;">
+              <strong>Scenario:</strong> Employee reports computer acting abnormally. Scan shows malware. Malware reveals C2 domains, which resolve to IPs, exposing other infected victims and the adversary.
+            </div>
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Each pivot correlates technical evidence with organizational scope.
+          </div>
+        </div>
+
+        <div class="volatility-stack">
+          <div class="volatility-row vr-1" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span>Step 1: Victim discovers malware</span>
+              <span class="volatility-badge">Victim ➔ Capability</span>
+            </div>
+          </div>
+          <div class="volatility-row vr-2" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span>Step 2: Malware contains CnC domain</span>
+              <span class="volatility-badge">Capability ➔ Infrastructure</span>
+            </div>
+          </div>
+          <div class="volatility-row vr-3" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span>Step 3: CnC Domain resolves to IP</span>
+              <span class="volatility-badge">Infrastructure</span>
+            </div>
+          </div>
+          <div class="volatility-row vr-4" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span>Step 4: Firewall logs reveal more victims contacting IP</span>
+              <span class="volatility-badge">Infrastructure ➔ Victim</span>
+            </div>
+          </div>
+          <div class="volatility-row vr-5" style="flex-direction: column; align-items: flex-start;">
+            <div style="display: flex; justify-content: space-between; width: 100%;">
+              <span>Step 5: IP ownership details reveal adversary</span>
+              <span class="volatility-badge">Infrastructure ➔ Adversary</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 12: 28.3.3 Threading Diamond Model & Kill Chain (Gadgets Inc. Walkthrough) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.3.2 Pivoting Across the Diamond Model:</strong><br>
+Pivoting is uncovering new information by using an established feature to discover related features.<br>
+Example: Victim discovers malware (Capability) ➔ Malware analysis reveals C2 IP (Infrastructure) ➔ Querying SIEM logs for that IP reveals second compromised host (Victim 2) ➔ Network monitoring links traffic to specific adversary group (Adversary).
+      </div>
+    </div>
+
+    <!-- Slide 16: [Original 12] -->
+    </div>
+
+    <!-- Slide 20: Master Diagram 1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif -->
+    <div class="slide" id="slide-20" data-notes="This master architecture diagram represents NIST SP 800-61r2 Incident Response operations. In the center is the 4-phase circular life cycle: Preparation, Detection & Analysis, Containment/Eradication/Recovery, and Post-Incident Activities. Surrounding it are key operational requirements: Policy/Plan/Procedures (28.4.1), Stakeholders & CMMC maturity levels (28.4.3), Attack Vectors matrix (28.4.6), Containment strategy criteria (28.4.7), and Evidence retention factors (28.4.9).">
+      <div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.4 Incident Response • Master Life Cycle Infographic</div>
+          <h2 class="slide-title">NIST SP 800-61r2: <span>Incident Response Life Cycle</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif', '28.4 Incident Response • Master Life Cycle Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif" alt="28.4 Incident Response • Master Life Cycle Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Circular 4-Phase Life Cycle (28.4.4)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Preparation ➔ Detection & Analysis ➔ Containment, Eradication & Recovery ➔ Post-Incident Activities (Lessons Learned).</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Capability & Stakeholders (28.4.1 - 28.4.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Three governance documents (Policy, Plan, Procedures); Cross-functional team (Management, IT, Legal, PR, HR); DoD CMMC maturity levels 2 to 5.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Operational Decision-Making (28.4.6 - 28.4.9)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">7 Attack vectors matrix; Containment dilemma (sudden disconnect vs. monitoring); Evidence retention determined by Prosecution, Data Type, and Cost.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4 NIST Life Cycle Architecture Summary:</strong><br>
+• <strong>Phase 1: Preparation:</strong> Form CSIRT, assemble forensic jump kits, baseline network topology, deploy defense tools.<br>
+• <strong>Phase 2: Detection & Analysis:</strong> Monitor 7 attack vectors (Web, Email, Removable Media, etc.), validate precursors/indicators, assess severity.<br>
+• <strong>Phase 3: Containment, Eradication & Recovery:</strong> Safe data wipe prevention, containment criteria, malware eradication, clean system restore.<br>
+• <strong>Phase 4: Post-Incident Activities:</strong> Conduct 10 review questions, lessons learned, policy hardening, evidence retention.<br>
+• <strong>CMMC IR Levels:</strong> Level 2 (documented plan), Level 3 (tested capability), Level 4 (TTP knowledge & 24/7 SOC), Level 5 (automated real-time response).
+      </div>
+    </div>
+
+    <!-- Slide 21: [Original 16] -->
+    <div class="slide" id="slide-21" data-notes="Section 28.3.3 explains how adversaries thread events together into a chain where each event must succeed before the next. Look at the official DoD example: Adversary targets Gadgets, Inc., spear-phishes NA1, establishes HTTP C2, converts NA1 host into a proxy, searches for 'most important research ever', finds Interesting Research Inc., and spear-phishes their Chief Research Officer directly from NA1's host!">
+<div class="slide-tag">28.3 Diamond Model & Kill Chain • 28.3.3 Threading</div>
+      <h2 class="slide-title">Attack Threading: <span>Gadgets Inc. to Victim 2</span></h2>
+
+      <div class="grid-2">
+        <div class="card" style="font-size: 0.81rem; line-height: 1.45;">
+          <div class="card-icon" style="color: var(--accent-rose);">🧵</div>
+          <h3 style="color: #fda4af;">Phase A: Compromise of Gadgets, Inc.</h3>
+          <ul style="margin-top: 0.2rem;">
+            <li><strong>1-2. Recon:</strong> Web search for Gadgets, Inc. finds <code>gadgets.com</code>; forum search finds network admin (NA1) email address.</li>
+            <li><strong>3-4. Delivery & Exploit:</strong> Phishing email with Trojan sent; NA1 opens malicious attachment, executing exploit.</li>
+            <li><strong>5-7. C2 & Proxy:</strong> NA1 host sends HTTP POST registering with C2; malware configured with backup C2 IPs and starts acting as a web proxy.</li>
+          </ul>
+        </div>
+
+        <div class="card" style="font-size: 0.81rem; line-height: 1.45;">
+          <div class="card-icon" style="color: var(--unizulu-gold);">🎯</div>
+          <h3 style="color: var(--unizulu-gold-light);">Phase B: Lateral Pivot to Interesting Research Inc.</h3>
+          <ul style="margin-top: 0.2rem;">
+            <li><strong>8. Discovery:</strong> Through NA1 proxy, adversary searches for "most important research ever", identifying Victim 2: Interesting Research Inc.</li>
+            <li><strong>9. Contact Mining:</strong> Adversary mines NA1's email contacts and discovers the Chief Research Officer (CRO).</li>
+            <li><strong>10-11. Dual Compromise:</strong> CRO receives spear-phish sent from NA1's host with the same Trojan payload. Both organizations are now compromised!</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 DoD Diamond Model End-to-End Thread Summary</span>
+      </div>
+      <div class="course-notes-body">
+        The adversary now has two compromised victims. They can mine the Chief Research Officer's email contacts for additional victims or set up another web proxy to exfiltrate proprietary research files.
+      </div>
+    </div>
+
+    <!-- Slide 13: 28.4.1 Establishing Incident Response Capability (NIST 800-61r2) -->
+    </div>
+
+    <!-- Slide 17: [Original 13] -->
+    </div>
+
+    <!-- Slide 22: [Original 17] -->
+    <div class="slide" id="slide-22" data-notes="Section 28.4.1 begins Incident Response. NIST SP 800-61r2 'Computer Security Incident Handling Guide' covers four major exam topics. The first step is establishing a Computer Security Incident Response Capability (CSIRC). NIST requires 3 key document structures: Policy Elements, Plan Elements, and Procedure Elements (SOPs). Notice that SOPs minimize human errors when staff are under intense stress.">
+<div class="slide-tag">28.4 Incident Response • 28.4.1 CSIRC Capability</div>
+      <h2 class="slide-title">Establishing a CSIRC: <span>Policy, Plan, Procedures</span></h2>
+
+      <div class="grid-3">
+        <div class="card">
+          <div class="card-icon">📜</div>
+          <h3>Policy Elements</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.4rem;">Details handling based on mission, size, and function:</p>
+          <ul style="font-size: 0.78rem;">
+            <li>Statement of management commitment</li>
+            <li>Purpose, objectives, and scope</li>
+            <li>Definition of security incidents</li>
+            <li>Organizational structure & roles</li>
+            <li>Prioritization of severity ratings</li>
+            <li>Performance measures & reporting forms</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🗺️</div>
+          <h3>Plan Elements</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.4rem;">Ensures clear cross-department expectations:</p>
+          <ul style="font-size: 0.78rem;">
+            <li>Mission, strategies, and goals</li>
+            <li>Senior management approval</li>
+            <li>Organizational approach to IR</li>
+            <li>Internal & external communication plans</li>
+            <li>Metrics measuring response capacity</li>
+            <li>Integration into overall organization</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">📋</div>
+          <h3>Procedure Elements (SOPs)</h3>
+          <p style="font-size: 0.8rem; margin-bottom: 0.4rem;">Standard Operating Procedures (SOPs):</p>
+          <ul style="font-size: 0.78rem;">
+            <li>Technical processes & specific techniques</li>
+            <li>Filling out incident forms</li>
+            <li>Following operational checklists</li>
+            <li><em>Critical value:</em> SOPs minimize human errors caused by personnel under extreme stress!</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 14: 28.4.3 Stakeholders & CMMC Framework -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4.1 Establishing a CSIRC Capability:</strong><br>
+NIST SP 800-61r2 mandates three baseline governance documents:<br>
+1. <strong>Policy:</strong> Defines mission, organizational authority, incident severity definitions, reporting mandates, and executive backing.<br>
+2. <strong>Plan:</strong> High-level roadmap detailing structure, team metrics, executive communications, and technology architecture.<br>
+3. <strong>Procedures (SOPs):</strong> Step-by-step technical standard operating procedures and forensic checklists for handling specific incident types.
+      </div>
+    </div>
+
+    <!-- Slide 18: [Original 14] -->
+    </div>
+
+    <!-- Slide 23: [Original 18] -->
+    <div class="slide" id="slide-23" data-notes="Incident response requires diverse organizational stakeholders: Management, Information Assurance, IT Support, Legal, PR/Media, HR, Business Continuity, and Physical Security. We also introduce CMMC (Cybersecurity Maturity Model Certification) used by the DoD. The Incident Response domain has 4 maturity levels: Level 2 (Plan/respond), Level 3 (Document/test), Level 4 (TTPs & 24/7 SOC), and Level 5 (Rigorous forensics & real-time response).">
+<div class="slide-tag">28.4 Incident Response • 28.4.3 Stakeholders & CMMC</div>
+      <h2 class="slide-title">IR Stakeholders & <span>DoD CMMC Levels</span></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-icon">👥</div>
+          <h3>Key Incident Stakeholders</h3>
+          <ul style="font-size: 0.78rem;">
+            <li><strong>Management:</strong> Sets policy, budgets, coordinates stakeholders, minimizes damage.</li>
+            <li><strong>Information Assurance:</strong> Implements firewall rule updates during containment.</li>
+            <li><strong>IT Support:</strong> Performs technical actions and assists in evidence collection.</li>
+            <li><strong>Legal Department:</strong> Reviews SOPs, handles prosecution, evidence legality, lawsuits.</li>
+            <li><strong>Public Affairs / PR:</strong> Manages media and public breach announcements.</li>
+            <li><strong>Human Resources:</strong> Handles disciplinary action for malicious employee incidents.</li>
+            <li><strong>Business Continuity & Facilities:</strong> Evaluates operational impact; secures evidence rooms.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">🎖️</div>
+          <h3>CMMC Incident Response Domain Levels</h3>
+          <ul style="font-size: 0.78rem;">
+            <li><strong>Level 2:</strong> Establish incident response plan following NIST; detect, report, prioritize, and respond via predefined procedures; root-cause analysis.</li>
+            <li><strong>Level 3:</strong> Document and report incidents to designated stakeholders; regularly test IR capabilities.</li>
+            <li><strong>Level 4:</strong> Use attacker TTP knowledge to refine planning; establish a <strong>24/7 Security Operations Center (SOC)</strong>.</li>
+            <li><strong>Level 5:</strong> Systematic computer forensic data gathering, secure storage; deploy automated real-time responses to known incident patterns.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 15: 28.4.4 NIST Incident Response Life Cycle (UNIZULU Palette) -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4.3 Stakeholders & CMMC Maturity:</strong><br>
+• <strong>IR Stakeholders:</strong> Management, IT Support, Legal, Public Relations, Human Resources, Facilities/Physical Security.<br>
+• <strong>DoD CMMC IR Maturity:</strong><br>
+  - Level 2: Establish plan, follow predefined NIST procedures.<br>
+  - Level 3: Test capability, report incidents to stakeholders.<br>
+  - Level 4: Leverage attacker TTP knowledge, operate 24/7 SOC.<br>
+  - Level 5: Automated real-time response, advanced forensic techniques.
+      </div>
+    </div>
+
+    <!-- Slide 19: [Original 15] -->
+    </div>
+
+    <!-- Slide 24: [Original 19] -->
+    <div class="slide" id="slide-24" data-notes="NIST SP 800-61r2 defines the 4 steps in the incident response life cycle: Preparation; Detection and Analysis; Containment, Eradication, and Recovery; and Post-Incident Activities. Pay close attention to the arrows! There is a feedback loop between Detection/Analysis and Containment/Eradication, and the entire cycle is a self-reinforcing learning loop where each incident improves future defense.">
+<div class="slide-tag">28.4 Incident Response • 28.4.4 NIST Life Cycle</div>
+      <h2 class="slide-title">NIST SP 800-61r2 <span>Incident Life Cycle</span></h2>
+
+      <div class="diagram-box" style="margin-bottom: 1.25rem;">
+        <!-- Visualized SVG NIST Life Cycle Diagram in UNIZULU Palette -->
+        <svg class="diagram-svg" viewBox="0 0 950 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="cycleArrowGold" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="#f59e0b"/>
+            </marker>
+            <marker id="feedbackArrowBlue" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+              <path d="M 0 1 L 8 5 L 0 9 z" fill="#38bdf8"/>
+            </marker>
+          </defs>
+
+          <!-- Step 1: Preparation -->
+          <rect x="20" y="40" width="200" height="90" rx="10" fill="rgba(37, 99, 235, 0.16)" stroke="#2563eb" stroke-width="2"/>
+          <text x="120" y="70" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#60a5fa" text-anchor="middle">1. PREPARATION</text>
+          <text x="120" y="92" font-family="'Inter', sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle">Train CSIRT, deploy tools,</text>
+          <text x="120" y="108" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">jump kits, baselines & controls</text>
+
+          <line x1="220" y1="85" x2="265" y2="85" stroke="#f59e0b" stroke-width="2" marker-end="url(#cycleArrowGold)"/>
+
+          <!-- Step 2: Detection and Analysis -->
+          <rect x="270" y="40" width="200" height="90" rx="10" fill="rgba(244, 63, 94, 0.16)" stroke="#f43f5e" stroke-width="2"/>
+          <text x="370" y="70" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#f43f5e" text-anchor="middle">2. DETECTION &amp; ANALYSIS</text>
+          <text x="370" y="92" font-family="'Inter', sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle">Continuous monitoring,</text>
+          <text x="370" y="108" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">alert validation &amp; scoping</text>
+
+          <!-- Bi-directional Feedback loop arrows between 2 and 3 -->
+          <path d="M 470 70 L 515 70" fill="none" stroke="#f59e0b" stroke-width="2" marker-end="url(#cycleArrowGold)"/>
+          <path d="M 515 100 L 470 100" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="3 3" marker-end="url(#feedbackArrowBlue)"/>
+          <text x="495" y="60" font-family="'JetBrains Mono', monospace" font-size="9" fill="#f59e0b" text-anchor="middle">Scope</text>
+          <text x="495" y="115" font-family="'JetBrains Mono', monospace" font-size="9" fill="#38bdf8" text-anchor="middle">Feedback</text>
+
+          <!-- Step 3: Containment, Eradication, Recovery (UNIZULU Gold) -->
+          <rect x="520" y="40" width="210" height="90" rx="10" fill="rgba(245, 158, 11, 0.18)" stroke="#f59e0b" stroke-width="2"/>
+          <text x="625" y="65" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#fbbf24" text-anchor="middle">3. CONTAINMENT,</text>
+          <text x="625" y="80" font-family="'Inter', sans-serif" font-size="12" font-weight="700" fill="#fbbf24" text-anchor="middle">ERADICATION &amp; RECOVERY</text>
+          <text x="625" y="100" font-family="'Inter', sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle">Isolate, purge malware,</text>
+          <text x="625" y="115" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">restore clean backups</text>
+
+          <line x1="730" y1="85" x2="765" y2="85" stroke="#f59e0b" stroke-width="2" marker-end="url(#cycleArrowGold)"/>
+
+          <!-- Step 4: Post-Incident Activities -->
+          <rect x="770" y="40" width="160" height="90" rx="10" fill="rgba(16, 185, 129, 0.16)" stroke="#10b981" stroke-width="2"/>
+          <text x="850" y="70" font-family="'Inter', sans-serif" font-size="13" font-weight="700" fill="#34d399" text-anchor="middle">4. POST-INCIDENT</text>
+          <text x="850" y="92" font-family="'Inter', sans-serif" font-size="11" fill="#cbd5e1" text-anchor="middle">Lessons learned,</text>
+          <text x="850" y="108" font-family="'Inter', sans-serif" font-size="11" fill="#94a3b8" text-anchor="middle">hardening &amp; reporting</text>
+
+          <!-- Overall Learning Feedback Loop in UNIZULU Gold -->
+          <path d="M 850 130 C 850 170, 120 170, 120 130" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4 4" marker-end="url(#cycleArrowGold)"/>
+          <text x="480" y="165" font-family="'JetBrains Mono', monospace" font-size="10" fill="#fbbf24" text-anchor="middle">Self-Reinforcing Learning Loop (Informs Future Incidents)</text>
+        </svg>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>Cyclical Interaction</h3>
+          <p>Phase 3 often cycles back to Phase 2 (Detection & Analysis) to gather more information or expand investigation scope as new lateral movement artifacts are uncovered.</p>
+        </div>
+        <div class="card">
+          <h3>Continuous Improvement</h3>
+          <p>The incident response life cycle is a <strong>self-reinforcing learning process</strong> whereby every single incident informs and improves procedures for handling future attacks.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 16: 28.4.5 & 28.4.6 Preparation & Common Attack Vectors -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4.4 NIST SP 800-61r2 Incident Response Life Cycle:</strong><br>
+Continuous cyclical framework consisting of 4 phases:<br>
+1. <strong>Preparation:</strong> Training team, acquiring tools/jump kits, deploying preventative controls.<br>
+2. <strong>Detection & Analysis:</strong> Monitoring attack vectors, evaluating precursors/indicators, assessing severity.<br>
+3. <strong>Containment, Eradication & Recovery:</strong> Limiting damage, removing malware/accounts, restoring systems cleanly.<br>
+4. <strong>Post-Incident Activity:</strong> Lessons learned meeting, evidence retention, policy updating.
+      </div>
+    </div>
+
+    <!-- Slide 20: Master Diagram 1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif -->
+    </div>
+
+    <!-- Slide 25: [Original 20] -->
+    <div class="slide" id="slide-25" data-notes="This master architecture diagram represents NIST SP 800-61r2 Incident Response operations. In the center is the 4-phase circular life cycle: Preparation, Detection & Analysis, Containment/Eradication/Recovery, and Post-Incident Activities. Surrounding it are key operational requirements: Policy/Plan/Procedures (28.4.1), Stakeholders & CMMC maturity levels (28.4.3), Attack Vectors matrix (28.4.6), Containment strategy criteria (28.4.7), and Evidence retention factors (28.4.9).">
+<div class="slide-header-flex">
+        <div>
+          <div class="slide-tag">28.4 Incident Response • Master Life Cycle Infographic</div>
+          <h2 class="slide-title">NIST SP 800-61r2: <span>Incident Response Life Cycle</span></h2>
+        </div>
+        <div class="slide-crest-badge">
+          <img src="unizulu_logo.svg" onerror="this.onerror=null; this.src='https://upload.wikimedia.org/wikipedia/de/5/56/University_of_Zululand_Logo.svg';" alt="UNIZULU Badge" class="unizulu-badge-icon">
+          <span>UNIZULU CSIRT</span>
+        </div>
+      </div>
+
+      <div class="diagram-layout">
+        <!-- High-Resolution Clickable Diagram Preview -->
+        <div class="diagram-showcase" onclick="openLightbox('1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif', '28.4 Incident Response • Master Life Cycle Infographic')">
+          <div class="diagram-zoom-hint">
+            <span>🔍 Click Diagram to Open Full HD View</span>
+          </div>
+          <img src="1c0ca5b4-26dd-4eac-abb6-a4967573c9e2.jfif" alt="28.4 Incident Response • Master Life Cycle Infographic" class="diagram-hero-img">
+        </div>
+
+        <!-- Accompanying Architectural Core Cards -->
+        <div class="diagram-sidebar-cards">
+          
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Circular 4-Phase Life Cycle (28.4.4)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Preparation ➔ Detection & Analysis ➔ Containment, Eradication & Recovery ➔ Post-Incident Activities (Lessons Learned).</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Capability & Stakeholders (28.4.1 - 28.4.3)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">Three governance documents (Policy, Plan, Procedures); Cross-functional team (Management, IT, Legal, PR, HR); DoD CMMC maturity levels 2 to 5.</p>
+            </div>
+            <div class="card" style="padding: 0.9rem;">
+              <h3 style="font-size: 0.92rem; color: var(--unizulu-navy); margin-bottom: 0.25rem;">Operational Decision-Making (28.4.6 - 28.4.9)</h3>
+              <p style="font-size: 0.79rem; line-height: 1.45;">7 Attack vectors matrix; Containment dilemma (sudden disconnect vs. monitoring); Evidence retention determined by Prosecution, Data Type, and Cost.</p>
+            </div>
+        </div>
+      </div>
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Architectural Study Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4 NIST Life Cycle Architecture Summary:</strong><br>
+• <strong>Phase 1: Preparation:</strong> Form CSIRT, assemble forensic jump kits, baseline network topology, deploy defense tools.<br>
+• <strong>Phase 2: Detection & Analysis:</strong> Monitor 7 attack vectors (Web, Email, Removable Media, etc.), validate precursors/indicators, assess severity.<br>
+• <strong>Phase 3: Containment, Eradication & Recovery:</strong> Safe data wipe prevention, containment criteria, malware eradication, clean system restore.<br>
+• <strong>Phase 4: Post-Incident Activities:</strong> Conduct 10 review questions, lessons learned, policy hardening, evidence retention.<br>
+• <strong>CMMC IR Levels:</strong> Level 2 (documented plan), Level 3 (tested capability), Level 4 (TTP knowledge & 24/7 SOC), Level 5 (automated real-time response).
+      </div>
+    </div>
+
+    <!-- Slide 21: [Original 16] -->
+    </div>
+
+    <!-- Slide 26: [Original 21] -->
+    <div class="slide" id="slide-26" data-notes="Phase 1: Preparation equips the CSIRT. A key asset is the Jump Kit—a portable box containing a laptop with forensic software, backup media, and cabling that must be inspected and updated regularly. In Phase 2: Detection and Analysis, because attacks take endless forms, teams prepare around the most common attack vectors: Web, Email, Loss/Theft, Impersonation, Attrition, and Media.">
+<div class="slide-tag">28.4 Incident Response • 28.4.5 & 28.4.6 Vectors</div>
+      <h2 class="slide-title">Preparation, Jump Kits & <span>Attack Vectors</span></h2>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-icon">🧰</div>
+          <h3>Preparation: The CSIRT Jump Kit</h3>
+          <p style="margin-bottom: 0.5rem;">A portable emergency kit ready for swift deployment:</p>
+          <ul>
+            <li>Pre-configured laptop with forensic imaging & analysis software.</li>
+            <li>Sterile backup media, write-blockers, packet sniffers, network cables.</li>
+            <li>Critical asset lists, network topologies, baseline readings, and clean OS images.</li>
+            <li><strong>Best Practice:</strong> Inspect regularly for software updates and practice deployment drills with the CSIRT.</li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="card-icon">⚡</div>
+          <h3>The 6 Common Attack Vectors</h3>
+          <ul style="font-size: 0.8rem;">
+            <li><strong>Web:</strong> Initiated from a website or web-hosted application.</li>
+            <li><strong>Email:</strong> Initiated from an email message or attachment.</li>
+            <li><strong>Loss or Theft:</strong> Equipment (laptops, phones) providing attack access.</li>
+            <li><strong>Impersonation:</strong> Spoofing or replacing something/someone with malicious intent.</li>
+            <li><strong>Attrition:</strong> Brute force attacks against devices, networks, or services (DDoS).</li>
+            <li><strong>Media:</strong> Initiated from external storage or removable media (USBs).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Slide 17: 28.4.7 Containment, Eradication, and Recovery -->
+
+      <div class="course-notes-toggle" onclick="toggleCourseNotes(this)">
+        <span>📖 Toggle Exact Course Note Summary</span>
+      </div>
+      <div class="course-notes-body">
+        <strong>28.4.5 & 28.4.6 Preparation, Jump Kits & Vectors:</strong><br>
+• <strong>Forensic Jump Kit:</strong> Dedicated laptop with packet sniffers, forensic write-blockers, clean removable storage, documentation binders, and cables.<br>
+• <strong>NIST Attack Vectors:</strong> Web, Email, Loss or Theft of Equipment, Impersonation (social engineering), Attrition (DDoS), Removable Media (infected USB), External/Removable Hardware.
+      </div>
+    </div>
+
+    <!-- Slide 22: [Original 17] -->
+    </div>
+
+  </main>
+
+  <!-- Speaker Notes Drawer -->
+  <div class="notes-drawer" id="notesDrawer">
+    <div class="notes-header">
+      <span>SPEAKER NOTES / TALKING POINTS</span>
+      <button onclick="toggleNotes()" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;">✕</button>
+    </div>
+    <div class="notes-content" id="notesContent">
+      Loading notes...
+    </div>
+  </div>
+
+  <!-- High-Resolution Lightbox Modal for Diagram Zooming -->
+  <div class="lightbox-modal" id="lightboxModal" onclick="closeLightbox(event)">
+    <div class="lightbox-header">
+      <span id="lightboxCaption">Diagram Inspection</span>
+      <button class="lightbox-close" onclick="closeLightboxDirect()">✕ Close [Esc]</button>
+    </div>
+    <img src="" alt="High-Res Diagram View" id="lightboxImage" class="lightbox-img">
+  </div>
+
+  <!-- Footer Navigation Controls -->
+  <footer>
+    <div class="controls">
+      <button class="btn" id="prevBtn" onclick="prevSlide()">◀ Prev</button>
+      <button class="btn btn-primary" id="nextBtn" onclick="nextSlide()">Next ▶</button>
+      <span class="slide-counter" id="slideCounter">Slide 1 / 26</span>
+    </div>
+
+    <div class="keyboard-hint">
+      Keys: <span class="key">←</span> / <span class="key">→</span> | Notes: <span class="key">N</span> | Theme: <span class="key">T</span> | Fullscreen: <span class="key">F</span>
+    </div>
+
+    <div style="display: flex; gap: 0.5rem;">
+      <button class="btn" id="themeToggleBtn" onclick="toggleTheme()">☀️ Blue & White</button>
+      <button class="btn" onclick="toggleNotes()">Toggle Notes</button>
+      <button class="btn" onclick="toggleFullScreen()">Fullscreen</button>
+    </div>
+  </footer>
+
+  <script>
+    const slides = document.querySelectorAll('.slide');
+    const progressBar = document.getElementById('progressBar');
+    const slideCounter = document.getElementById('slideCounter');
+    const notesDrawer = document.getElementById('notesDrawer');
+    const notesContent = document.getElementById('notesContent');
+    const lightboxModal = document.getElementById('lightboxModal');
+    const lightboxImage = document.getElementById('lightboxImage');
+    const lightboxCaption = document.getElementById('lightboxCaption');
+    const themeToggleBtn = document.getElementById('themeToggleBtn');
+    let currentSlide = 0;
+
+    function updateSlide() {{
+      slides.forEach((slide, index) => {{
+        slide.classList.toggle('active', index === currentSlide);
+      }});
+
+      const total = slides.length;
+      const progressPercent = ((currentSlide + 1) / total) * 100;
+      progressBar.style.width = `${{progressPercent}}%`;
+      slideCounter.innerText = `Slide ${{currentSlide + 1}} / ${{total}}`;
+
+      // Update speaker notes
+      const activeSlide = slides[currentSlide];
+      const notes = activeSlide.getAttribute('data-notes') || "No specific speaker notes for this slide.";
+      notesContent.innerText = notes;
+    }}
+
+    function nextSlide() {{
+      if (currentSlide < slides.length - 1) {{
+        currentSlide++;
+        updateSlide();
+      }}
+    }}
+
+    function prevSlide() {{
+      if (currentSlide > 0) {{
+        currentSlide--;
+        updateSlide();
+      }}
+    }}
+
+    function goToSlide(index) {{
+      if (index >= 0 && index < slides.length) {{
+        currentSlide = index;
+        updateSlide();
+      }}
+    }}
+
+    function toggleNotes() {{
+      notesDrawer.classList.toggle('open');
+    }}
+
+    function toggleCourseNotes(buttonElem) {{
+      const parent = buttonElem.parentElement;
+      const body = parent.querySelector('.course-notes-body');
+      if (body) {{
+        body.classList.toggle('open');
+      }}
+    }}
+
+    function openLightbox(src, caption) {{
+      lightboxImage.src = src;
+      lightboxCaption.innerText = caption || "High-Resolution Architectural Diagram";
+      lightboxModal.classList.add('open');
+    }}
+
+    function closeLightboxDirect() {{
+      lightboxModal.classList.remove('open');
+    }}
+
+    function closeLightbox(e) {{
+      if (e.target === lightboxModal) {{
+        closeLightboxDirect();
+      }}
+    }}
+
+    function toggleTheme() {{
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      themeToggleBtn.innerText = isDark ? "🌙 Midnight Navy" : "☀️ Blue & White";
+    }}
+
+    function toggleFullScreen() {{
+      if (!document.fullscreenElement) {{
+        document.documentElement.requestFullscreen().catch(err => console.log(err));
+      }} else {{
+        if (document.exitFullscreen) {{
+          document.exitFullscreen();
+        }}
+      }}
+    }}
+
+    // Keyboard listeners
+    window.addEventListener('keydown', (e) => {{
+      if (e.key === 'Escape') {{
+        closeLightboxDirect();
+        notesDrawer.classList.remove('open');
+        return;
+      }}
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {{
+        nextSlide();
+      }} else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {{
+        prevSlide();
+      }} else if (e.key === 'n' || e.key === 'N') {{
+        toggleNotes();
+      }} else if (e.key === 't' || e.key === 'T') {{
+        toggleTheme();
+      }} else if (e.key === 'f' || e.key === 'F') {{
+        toggleFullScreen();
+      }} else if (e.key === 'Home') {{
+        goToSlide(0);
+      }} else if (e.key === 'End') {{
+        goToSlide(slides.length - 1);
+      }}
+    }});
+
+    // Initialize
+    updateSlide();
+  </script>
+</body>
+</html>

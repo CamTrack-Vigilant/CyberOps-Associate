@@ -1,5 +1,355 @@
-5.0 Introduction
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Module 5 Notes - Print Edition</title>
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --ink: #152033;
+      --muted: #4c5a75;
+      --accent: #0c6a83;
+      --accent-soft: #d8edf3;
+      --card: #ffffff;
+      --border: #d9e1ee;
+      --shadow: 0 18px 40px rgba(17, 33, 58, 0.14);
+      --radius: 16px;
+      --code-bg: #f4f7fb;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 15% -10%, #e8f3ff 0%, rgba(232, 243, 255, 0) 45%),
+        radial-gradient(circle at 100% 0%, #d9edf4 0%, rgba(217, 237, 244, 0) 52%),
+        linear-gradient(180deg, #f6f9ff 0%, #ecf1f8 100%);
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.62;
+    }
+
+    .shell {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 22px 16px 34px;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 12px;
+      z-index: 10;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(255, 255, 255, 0.86);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      backdrop-filter: blur(7px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.07);
+      margin-bottom: 16px;
+    }
+
+    .toolbar .title {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 9px 12px;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background-color 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 7px 18px rgba(12, 106, 131, 0.25);
+    }
+
+    .btn-secondary {
+      background: #fff;
+      border-color: var(--border);
+      color: var(--ink);
+    }
+
+    .paper {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .cover {
+      padding: 28px 28px 22px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(130deg, #f7fbff 0%, #eff6ff 45%, #eef9f7 100%);
+    }
+
+    .cover h1 {
+      margin: 0 0 6px;
+      font-size: clamp(24px, 3vw, 34px);
+      line-height: 1.15;
+      letter-spacing: 0.2px;
+    }
+
+    .cover p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 24px 28px 34px;
+      overflow-wrap: anywhere;
+    }
+
+    .content h1,
+    .content h2,
+    .content h3,
+    .content h4,
+    .content h5,
+    .content h6 {
+      color: #101b2e;
+      line-height: 1.25;
+      margin-top: 1.4em;
+      margin-bottom: 0.56em;
+      break-after: avoid;
+    }
+
+    .content h1 {
+      font-size: 30px;
+      border-bottom: 2px solid #e5edf7;
+      padding-bottom: 0.3em;
+      margin-top: 0.4em;
+    }
+
+    .content h2 {
+      font-size: 24px;
+      border-left: 5px solid var(--accent-soft);
+      padding-left: 10px;
+    }
+
+    .content h3 {
+      font-size: 20px;
+    }
+
+    .content h4 {
+      font-size: 17px;
+      color: #1c2f4f;
+    }
+
+    .content p {
+      margin: 0.62em 0;
+    }
+
+    .content ul,
+    .content ol {
+      margin: 0.55em 0 0.85em 1.2em;
+      padding-left: 1.15em;
+    }
+
+    .content li {
+      margin: 0.32em 0;
+    }
+
+    .content hr {
+      border: 0;
+      border-top: 1px solid #dbe4f1;
+      margin: 1.35em 0;
+    }
+
+    .content code {
+      background: var(--code-bg);
+      border: 1px solid #dfe7f3;
+      color: #223a62;
+      border-radius: 6px;
+      padding: 2px 6px;
+      font-size: 0.92em;
+      font-family: Consolas, "Courier New", monospace;
+    }
+
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid #dfe7f3;
+      border-radius: 8px;
+      padding: 12px;
+      overflow: auto;
+    }
+
+    .content pre code {
+      border: 0;
+      background: transparent;
+      padding: 0;
+    }
+
+    .content blockquote {
+      margin: 0.9em 0;
+      padding: 0.65em 0.95em;
+      background: #f7fbff;
+      border-left: 4px solid #89bfd0;
+      color: #2b4366;
+      border-radius: 0 8px 8px 0;
+    }
+
+    .content table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1em 0 1.2em;
+      font-size: 0.95em;
+      break-inside: avoid;
+    }
+
+    .content th,
+    .content td {
+      border: 1px solid #d8e3f1;
+      padding: 9px 10px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    .content th {
+      background: #eff5fc;
+      font-weight: 700;
+      color: #1c2f4f;
+    }
+
+    .content tr:nth-child(even) td {
+      background: #fafcff;
+    }
+
+    .content img {
+      display: block;
+      width: 100%;
+      max-width: 900px;
+      height: auto;
+      margin: 10px auto 16px;
+      border: 1px solid #d5dfef;
+      border-radius: 10px;
+      box-shadow: 0 5px 18px rgba(19, 37, 65, 0.11);
+      break-inside: avoid;
+    }
+
+    .note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .error {
+      border: 1px solid #efc4c4;
+      background: #fff1f1;
+      color: #8f1d1d;
+      padding: 12px;
+      border-radius: 10px;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 820px) {
+      .cover,
+      .content {
+        padding: 18px;
+      }
+
+      .toolbar {
+        top: 8px;
+      }
+    }
+
+    @media print {
+      :root {
+        --bg: #ffffff;
+      }
+
+      html, body {
+        background: #ffffff !important;
+      }
+
+      .shell {
+        max-width: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      .toolbar {
+        display: none !important;
+      }
+
+      .paper {
+        border: 0;
+        border-radius: 0;
+        box-shadow: none;
+      }
+
+      .cover {
+        border-bottom: 1px solid #ccd7e7;
+      }
+
+      .content img,
+      .content table,
+      .content h1,
+      .content h2,
+      .content h3,
+      .content h4 {
+        break-inside: avoid;
+      }
+
+      @page {
+        size: A4;
+        margin: 11mm;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="toolbar">
+      <div class="title">Module 5 - Network Protocols: print-ready renderer</div>
+      <div class="actions">
+        <button class="btn-secondary" id="reloadBtn" type="button">Reload Markdown</button>
+        <button class="btn-primary" id="printBtn" type="button">Export to PDF</button>
+      </div>
+    </div>
+
+    <main class="paper">
+      <header class="cover">
+        <h1>Module 5 Study Notes</h1>
+        <p>Professional print layout from markdown. Use Export to PDF when the page finishes rendering.</p>
+        <div class="note">Source file: notes.md</div>
+      </header>
+      <article class="content" id="content"></article>
+    </main>
+  </div>
+
+  <script id="embeddedMarkdown" type="text/plain">
+## 5.0 Introduction
 Scroll to begin
+
+### 5.0.1 Why Should I Take this Module?
 
 ### 5.0.1 Why Should I Take this Module?
 We all communicate on networks daily. Looking at social media, streaming video, or researching information on the internet are common activities that we normally don’t think much about. However, numerous technological processes are at work to bring us the content that we want from the web.
@@ -266,64 +616,37 @@ You show strong command of **data flow** and **PDU identification**. You consist
 
 ### Deep Dive Correction Table
 
-**Q1: Domain Name Resolution Failure**
-- **My Logic:** I chose the Network layer because ping to an IP address worked, so I assumed routing was the problem.
-- **Correct Reality:** The failure is at **Layer 7 - Application** because **DNS** performs name resolution. If IP-based ping works but the domain name does not, the Network layer is functioning and the name lookup function (DNS) is failing.
-
-**Q2: MAC vs. IP Address Checking Order**
-- **My Logic:** I focused on the destination IP address, assuming software checks that first.
-- **Correct Reality:** The first check is the **destination MAC address** at **Layer 2 - Data Link**. The NIC uses the frame header to decide whether to accept the frame before the packet is processed at Layer 3.
-
-**Q3: Flow Control**
-- **My Logic:** I was unsure, but I knew it had to do with timing and speed.
-- **Correct Reality:** **Flow control** is the **Layer 4 - Transport** timing function that regulates the rate of delivery so the receiver is not overwhelmed. ✓ (Correctly answered)
-
-**Q4: PDU Name at Transport Layer**
-- **My Logic:** I recognized that the data was chopped into chunks, but I did not tie the name to the correct layer.
-- **Correct Reality:** The PDU is a **segment** at **Layer 4 - Transport**. This layer adds port numbers and prepares the data for reliable end-to-end communication. ✓ (Correctly answered)
-
-**Q5: Broadcast Delivery Method**
-- **My Logic:** I knew it was broadcast, but I did not connect it to the delivery model precisely.
-- **Correct Reality:** **Broadcast** is a **Layer 2 - Data Link** delivery method that sends one message to all hosts on the local network segment. ✓ (Correctly answered)
-
-**Q6: Encryption Layer**
-- **My Logic:** I chose the Application layer because the browser starts the request there.
-- **Correct Reality:** **Layer 6 - Presentation** is responsible for encryption, compression, and data formatting. It prepares the information so it can be safely interpreted by the receiving host.
-
-**Q7: Connectionless, Best-Effort Protocol**
-- **My Logic:** I answered correctly with UDP.
-- **Correct Reality:** **UDP** is the **Transport layer** protocol that sends datagrams without establishing a reliable session. It prioritizes speed and low overhead over delivery confirmation. ✓ (Correctly answered)
-
-**Q8: Frame Rejection**
-- **My Logic:** I answered correctly that it should be dropped.
-- **Correct Reality:** The frame is rejected at **Layer 2 - Data Link** because Ethernet enforces minimum frame size rules. Frames that do not meet the protocol requirements are discarded by the NIC. ✓ (Correctly answered)
-
-**Q9: Router Operation Layer**
-- **My Logic:** I thought routing was a Transport-layer function because the packet still needed to move end to end.
-- **Correct Reality:** Routing is a **Layer 3 - Network** function. Routers use **IP addresses** to make forwarding decisions and select the next hop across networks.
-
-**Q10: Layer Isolation Benefit**
-- **My Logic:** I answered correctly that changing Ethernet to Wi-Fi should not force a browser reinstall.
-- **Correct Reality:** **Layer isolation** means one layer can change without forcing redesigns in adjacent layers. In your example, the **Layer 1/2 access method** changes, but the browser at **Layer 7** does not need to be reinstalled. ✓ (Correctly answered)
-
-### Key Differentiators Cheat Sheet
-
-- **DNS vs. Ping:** **DNS** belongs to **Layer 7 - Application** because it resolves names into addresses. **Ping** uses **ICMP** at **Layer 3 - Network** because it tests reachability to an IP address and confirms whether packets can traverse the routed path.
-- **MAC vs. IP Addressing:** During de-encapsulation, the hardware checks the **MAC address** first at **Layer 2 - Data Link** so the NIC knows whether the frame is intended for it. The **IP address** is checked next at **Layer 3 - Network** so the host can determine whether the packet is meant for that device at the logical addressing level.
-- **Routing vs. Transport:** **Routing** is a **Layer 3 - Network** responsibility because routers choose the path using IP addresses and forwarding tables. **Transport** is a **Layer 4 - Transport** responsibility because TCP and UDP manage ports, sessions, reliability, and delivery behavior between endpoints.
-- **Hardware vs. Software Order:** Hardware handles the frame first, software interprets the packet next, and the application only sees the data after the lower-layer headers have been removed. That order is why a local link problem can break connectivity before a browser ever sees an error message.
-- **Presentation vs. Application:** The Application layer creates the request, but the Presentation layer makes it usable and secure through encoding, encryption, and formatting. If you confuse the two, remember that the browser decides what to ask for, while the Presentation layer decides how that information is packaged safely.
-
-### Strategic Focus
-
-- Review **Layers 3 through 7** with special attention to where **DNS**, **encryption**, **addressing**, and **routing** actually occur.
-- Rehearse the difference between **MAC addresses** and **IP addresses** until you can explain the order of checks during de-encapsulation without hesitation.
-- Practice identifying when a problem is **Application-layer** name resolution versus **Network-layer** reachability.
-- Revisit **router behavior** so you can distinguish packet forwarding at **Layer 3** from port-based reliability and retransmission at **Layer 4**.
-- Continue drilling **PDU names**: **data**, **segment**, **packet**, **frame**, and **bits**.
-- Use lab results from **ping**, **tracert**, and **nslookup** to map symptoms back to the correct OSI layer before choosing a fix.
-
-Notes and further study suggestions:
+| The Question | My Initial Logic (The Misconception) | The Correct Technical Reality |
+| --- | --- | --- |
+| In your earlier lab, you could ping 8.8.8.8 but could not resolve "www.cisco.com". At which OSI layer did communication fail when you tried to use the domain name? | I chose the Network layer because ping to an IP address worked, so I assumed the problem had to be routing. | The failure is at **Layer 7 - Application** because **DNS** performs name resolution. If IP-based ping works but the domain name does not, the Network layer is functioning and the name lookup function is failing. |
+| A web server receives bits from a client. After converting the bits back into a frame, what is the very next piece of information the server will look at to see if the data is intended for its hardware? | I focused on the destination IP address, assuming software would check that first. | The first check is the **destination MAC address** at **Layer 2 - Data Link**. The NIC uses the frame header to decide whether to accept the frame before the packet is processed at Layer 3. |
+| If a sender transmits data faster than a receiver can process it, which timing component is responsible for negotiating a slower speed to prevent data loss? | I was unsure, but I knew it had to do with timing and speed. | **Flow control** is the **Layer 4 - Transport** timing function that regulates the rate of delivery so the receiver is not overwhelmed. |
+| During encapsulation, what is the correct name for the PDU after the Transport layer adds port numbers but before the Network layer adds IP addresses? | I recognized that the data was chopped into chunks, but I did not tie the name to the correct layer. | The PDU is a **segment** at **Layer 4 - Transport**. This layer adds port numbers and prepares the data for reliable end-to-end communication. |
+| A network administrator notices a broadcast storm where every device on a LAN is receiving the same message simultaneously. Which delivery method is being used? | I knew it was broadcast, but I did not connect it to the delivery model precisely. | **Broadcast** is a **Layer 2 - Data Link** delivery method that sends one message to all hosts on the local network segment. |
+| Which layer is responsible for "dressing" the data in encryption like HTTPS to ensure that it remains gibberish if intercepted? | I first chose the Application layer because the browser starts the request there. | **Layer 6 - Presentation** is responsible for encryption, compression, and data formatting. It prepares the information so it can be safely interpreted by the receiving host. |
+| In the TCP/IP suite, which protocol is considered connectionless and best-effort, meaning it does not confirm if the data actually arrived? | I answered correctly with UDP. | **UDP** is the **Transport layer** protocol that sends datagrams without establishing a reliable session. It prioritizes speed and low overhead over delivery confirmation. |
+| What happens to a frame that is received by a network interface card but is smaller than the minimum size required by the protocol? | I answered correctly that it should be dropped. | The frame is rejected at **Layer 2 - Data Link** because Ethernet enforces minimum frame size rules. Frames that do not meet the protocol requirements are discarded by the NIC. |
+| When a router receives a packet and looks at the header to decide which path to take to reach a destination across the internet, which layer is it operating at? | I thought routing was a Transport-layer function because the packet still needed to move end to end. | Routing is a **Layer 3 - Network** function. Routers use **IP addresses** to make forwarding decisions and select the next hop across networks. |
+| One benefit of a layered model is Layer Isolation. Which scenario best describes this benefit? | I answered correctly that changing Ethernet to Wi-Fi should not force a browser reinstall. | **Layer isolation** means one layer can change without forcing redesigns in adjacent layers. In your example, the **Layer 1/2 access method** changes, but the browser at **Layer 7** does not need to be reinstalled. |
++
++### Key Differentiators Cheat Sheet
++
++- **DNS vs. Ping:** **DNS** belongs to **Layer 7 - Application** because it resolves names into addresses. **Ping** uses **ICMP** at **Layer 3 - Network** because it tests reachability to an IP address and confirms whether packets can traverse the routed path.
++- **MAC vs. IP Addressing:** During de-encapsulation, the hardware checks the **MAC address** first at **Layer 2 - Data Link** so the NIC knows whether the frame is intended for it. The **IP address** is checked next at **Layer 3 - Network** so the host can determine whether the packet is meant for that device at the logical addressing level.
++- **Routing vs. Transport:** **Routing** is a **Layer 3 - Network** responsibility because routers choose the path using IP addresses and forwarding tables. **Transport** is a **Layer 4 - Transport** responsibility because TCP and UDP manage ports, sessions, reliability, and delivery behavior between endpoints.
++- **Hardware vs. Software Order:** Hardware handles the frame first, software interprets the packet next, and the application only sees the data after the lower-layer headers have been removed. That order is why a local link problem can break connectivity before a browser ever sees an error message.
++- **Presentation vs. Application:** The Application layer creates the request, but the Presentation layer makes it usable and secure through encoding, encryption, and formatting. If you confuse the two, remember that the browser decides what to ask for, while the Presentation layer decides how that information is packaged safely.
++
++### Strategic Focus
++
++- Review **Layers 3 through 7** with special attention to where **DNS**, **encryption**, **addressing**, and **routing** actually occur.
++- Rehearse the difference between **MAC addresses** and **IP addresses** until you can explain the order of checks during de-encapsulation without hesitation.
++- Practice identifying when a problem is **Application-layer** name resolution versus **Network-layer** reachability.
++- Revisit **router behavior** so you can distinguish packet forwarding at **Layer 3** from port-based reliability and retransmission at **Layer 4**.
++- Continue drilling **PDU names**: **data**, **segment**, **packet**, **frame**, and **bits**.
++- Use lab results from **ping**, **tracert**, and **nslookup** to map symptoms back to the correct OSI layer before choosing a fix.
++
++Notes and further study suggestions:
 
 - Review how protocols at different layers (physical, data link, network, transport, application) interact during typical sessions.
 - Practice using network utilities: `ping`, `traceroute`/`tracert`, `nslookup`/`dig`, and packet capture tools like Wireshark.
@@ -880,3 +1203,204 @@ The response uses the same stack in reverse.
 ### Quick Takeaway
 
 The browser does not send a webpage directly. It sends data that gets wrapped by each lower layer until the network can move it reliably across the path. On the return path, the server and the client remove those layers in reverse order until the browser can display the page.
+  </script>
+
+  <script>
+    const content = document.getElementById("content");
+
+    const escapeHtml = (text) => text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+
+    const inline = (text) => {
+      return text
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, "<img alt=\"$1\" src=\"$2\" />")
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, "<a href=\"$2\" target=\"_blank\" rel=\"noreferrer\">$1</a>");
+    };
+
+    function parseMarkdown(md) {
+      const lines = md.replace(/\r\n/g, "\n").split("\n");
+      let html = "";
+      let inUl = false;
+      let inOl = false;
+      let inCode = false;
+      let codeBuffer = [];
+      let inTable = false;
+      let tableRows = [];
+
+      const closeLists = () => {
+        if (inUl) {
+          html += "</ul>";
+          inUl = false;
+        }
+        if (inOl) {
+          html += "</ol>";
+          inOl = false;
+        }
+      };
+
+      const flushTable = () => {
+        if (!inTable || tableRows.length === 0) {
+          inTable = false;
+          tableRows = [];
+          return;
+        }
+
+        const header = tableRows[0];
+        const divider = tableRows[1] || [];
+        const hasDivider = divider.every((cell) => /^:?-{3,}:?$/.test(cell.trim()));
+        const startBody = hasDivider ? 2 : 1;
+
+        html += "<table><thead><tr>" + header.map((cell) => "<th>" + inline(escapeHtml(cell.trim())) + "</th>").join("") + "</tr></thead><tbody>";
+
+        for (let i = startBody; i < tableRows.length; i += 1) {
+          html += "<tr>" + tableRows[i].map((cell) => "<td>" + inline(escapeHtml(cell.trim())) + "</td>").join("") + "</tr>";
+        }
+
+        html += "</tbody></table>";
+        inTable = false;
+        tableRows = [];
+      };
+
+      for (let i = 0; i < lines.length; i += 1) {
+        const raw = lines[i];
+        const line = raw.trimEnd();
+
+        if (inCode) {
+          if (line.startsWith("```")) {
+            html += "<pre><code>" + escapeHtml(codeBuffer.join("\n")) + "</code></pre>";
+            codeBuffer = [];
+            inCode = false;
+          } else {
+            codeBuffer.push(raw);
+          }
+          continue;
+        }
+
+        if (line.startsWith("```")) {
+          closeLists();
+          flushTable();
+          inCode = true;
+          continue;
+        }
+
+        if (/^\|.+\|\s*$/.test(line)) {
+          closeLists();
+          inTable = true;
+          const cells = line.split("|").slice(1, -1);
+          tableRows.push(cells);
+          continue;
+        }
+
+        if (inTable) {
+          flushTable();
+        }
+
+        if (line.trim() === "") {
+          closeLists();
+          html += "<p></p>";
+          continue;
+        }
+
+        if (/^---+$/.test(line.trim())) {
+          closeLists();
+          html += "<hr />";
+          continue;
+        }
+
+        const headingMatch = line.match(/^(#{1,6})\s+(.+)$/);
+        if (headingMatch) {
+          closeLists();
+          const level = headingMatch[1].length;
+          html += `<h${level}>${inline(escapeHtml(headingMatch[2]))}</h${level}>`;
+          continue;
+        }
+
+        const blockquoteMatch = line.match(/^>\s+(.+)$/);
+        if (blockquoteMatch) {
+          closeLists();
+          html += "<blockquote>" + inline(escapeHtml(blockquoteMatch[1])) + "</blockquote>";
+          continue;
+        }
+
+        const ulMatch = line.match(/^[-*]\s+(.+)$/);
+        if (ulMatch) {
+          if (!inUl) {
+            if (inOl) {
+              html += "</ol>";
+              inOl = false;
+            }
+            html += "<ul>";
+            inUl = true;
+          }
+          html += "<li>" + inline(escapeHtml(ulMatch[1])) + "</li>";
+          continue;
+        }
+
+        const olMatch = line.match(/^\d+\.\s+(.+)$/);
+        if (olMatch) {
+          if (!inOl) {
+            if (inUl) {
+              html += "</ul>";
+              inUl = false;
+            }
+            html += "<ol>";
+            inOl = true;
+          }
+          html += "<li>" + inline(escapeHtml(olMatch[1])) + "</li>";
+          continue;
+        }
+
+        closeLists();
+        html += "<p>" + inline(escapeHtml(line)) + "</p>";
+      }
+
+      closeLists();
+      flushTable();
+      return html;
+    }
+
+    async function loadMarkdown() {
+      const embedded = document.getElementById("embeddedMarkdown").textContent;
+      const hasEmbedded = Boolean(embedded && embedded.trim());
+
+      if (hasEmbedded) {
+        content.innerHTML = parseMarkdown(embedded);
+      }
+
+      try {
+        const response = await fetch("notes.md?ts=" + Date.now());
+        if (!response.ok) {
+          throw new Error("Failed to load notes.md (status " + response.status + ")");
+        }
+        const md = await response.text();
+        content.innerHTML = parseMarkdown(md);
+      } catch (error) {
+        if (!hasEmbedded) {
+          content.innerHTML = `
+            <div class="error">
+              <strong>Could not load notes.md automatically.</strong><br />
+              ${error.message}<br /><br />
+              Keep this HTML file in the same folder as notes.md, then click <strong>Reload Markdown</strong>.
+            </div>
+          `;
+        }
+      }
+    }
+
+    document.getElementById("printBtn").addEventListener("click", () => window.print());
+    document.getElementById("reloadBtn").addEventListener("click", loadMarkdown);
+
+    loadMarkdown();
+  </script>
+</body>
+</html>
+
+
+
+
+
